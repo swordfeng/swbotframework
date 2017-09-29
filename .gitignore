@@ -1,2 +1,5 @@
-virtualenv/
 __pycache__/
+.vscode/
+virtualenv/
+persistence/
+secret.py

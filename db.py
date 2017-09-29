@@ -1,6 +1,7 @@
 import json
 import os
 import urllib
+import urllib.parse
 
 db_name = 'persistence'
 

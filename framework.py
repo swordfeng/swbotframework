@@ -15,29 +15,57 @@ class Channel:
             self.config = {}
         if 'listeners' not in self.config:
             self.config['listeners'] = []
+        if 'to_listen' not in self.config:
+            self.config['to_listen'] = []
         cache_object(self)
+        for ident in self.config['listeners']:
+            chan = query_object(ident)
+            if chan is not None:
+                self.add_listener(chan)
+        for ident in self.config['to_listen']:
+            chan = query_object(ident)
+            if chan is not None:
+                chan.add_listener(self)
     def add_listener(self, chan: 'Channel'):
+        logger.info(f'{self.ident()} add_listener: {chan.ident()}')
         chanId = chan.ident()
+        self.listeners[chanId] = chan
+    def enable_listener(self, chan):
+        chanId = chan.ident()
+        logger.info(f'{self.ident()} enable_listener: {chan.ident()}')
         if chanId not in self.config['listeners']:
             self.config['listeners'].append(chanId)
             self.persist()
-        self.listeners[chanId] = chan
+        if self.ident() not in chan.config['to_listen']:
+            chan.config['to_listen'].append(self.ident())
+            chan.persist()
     def remove_listener(self, chan: 'Channel'):
+        logger.info(f'{self.ident()} remove_listener: {chan.ident()}')
         chanId = chan.ident()
+        del(self.listeners[chanId])
+    def disable_listener(self, chan):
+        chanId = chan.ident()
+        logger.info(f'{self.ident()} disable_listener: {chan.ident()}')
         if chanId in self.config['listeners']:
             self.config['listeners'].remove(chanId)
             self.persist()
-        del(self.listeners[chanId])
+        if self.ident() in self.config['to_listen']:
+            chan.config['to_listen'].remove(self.ident())
+            chan.persist()
     def on_receive(self, msg: 'Message'):
+        logger.info(f'{self.ident()} on_receive: {msg}')
         for chanId in self.listeners:
             try:
                 self.listeners[chanId].send_message(msg, self)
             except:
                 logger.exception(f'Error sending message to {chanId}')
+        glb = query_object('global_hook')
+        if glb is not None:
+            glb.send_message(msg, self)
     def on_uncache(self):
         self.persist()
     def persist(self):
-        db.set_json(self.ident(), self.config)
+        db.put_json(self.ident(), self.config)
     def ident(self):
         raise NotImplemented()
     def send_message(self, msg: 'Message', chan: 'Channel'):
@@ -66,21 +94,29 @@ class Message(dict):
     def __init__(self, data={}, uuid=None):
         super().__init__(data)
         if uuid == None:
-            uuid = uuid1()
+            uuid = str(uuid1())
         self.uuid = uuid
         cache_object(self)
         self.persist()
     def on_uncache(self):
         self.persist()
     def persist(self):
-        db.set_json(self.ident(), self.data)
+        db.put_json(self.ident(), self)
     def add_alias(self, ident):
         assert_ident(ident)
         if 'alias' not in self:
             self['alias'] = []
-        self['alias'].append()
+        self['alias'].append(ident)
         self.persist()
-        db.set(ident, self.ident())
+        db.put(ident, self.ident())
+    def get_alias(self, prefix):
+        assert_ident(prefix)
+        if 'alias' not in self:
+            return None
+        for ident in self['alias']:
+            if ident == prefix or (ident.startswith(prefix) and ident[len(prefix)] == ':'):
+                return ident
+        return None
     def query_alias(alias):
         ident = db.get(alias)
         if ident is not None:

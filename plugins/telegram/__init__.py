@@ -3,6 +3,7 @@ import db
 import logging
 import telegram
 import asyncio
+import logging
 
 logger = logging.getLogger('telegram')
 
@@ -41,16 +42,22 @@ class TelegramBot:
             return TelegramChannel(chat, self)
     async def worker(self):
         while True:
-            logger.info('poll')
-            updates = await async_execute(self.bot.getUpdates, offset=self.last_update)
-            logger.info('updates')
-            for update in updates:
-                if update.update_id >= self.last_update:
-                    self.last_update = update.update_id + 1
-                msg = telegram2message(update, self)
-                if msg is not None:
-                    chan = query_object(msg['origin'])
-                    chan.on_receive(msg)
+            try:
+                logger.info('poll')
+                updates = await async_execute(self.bot.getUpdates, offset=self.last_update)
+                logger.info('updates')
+                for update in updates:
+                    if update.update_id >= self.last_update:
+                        self.last_update = update.update_id + 1
+                    msg = telegram2message(update, self)
+                    logger.info(f'receive: {msg}')
+                    if msg is not None:
+                        chan = query_object(msg['origin'])
+                        chan.on_receive(msg)
+            except telegram.error.TimedOut:
+                logger.info('poll timeout')
+            except:
+                logger.exception('worker exception')
 
 class TelegramChannel(Channel):
     def __init__(self, chat: telegram.Chat, bot: TelegramBot):
@@ -58,19 +65,25 @@ class TelegramChannel(Channel):
         self.chat = chat
         self.chat_id = chat.id
         super().__init__() # load config, cache
+        self.add_listener(query_object('echo')) # todo: remove
     def ident(self):
         return f'{self.bot.ident()}:chan:{self.chat_id}'
     def send_message(self, msg: Message, chan: Channel):
+        logger.info(f'{self.ident()} send: {msg}')
         if 'file' in msg:
-            pass # senddocuemnt
+            pass # todo: senddocuemnt
         elif 'image' in msg:
-            pass # sendphoto
+            pass # todo: sendphoto
         elif 'text' in msg:
-            pass # sendmessage
+            kw = {'chat_id': self.chat_id, 'text': msg['text']}
+            if 'reply_to' in msg:
+                rep_msg = query_object(msg['reply_to'])
+                ident = rep_msg.get_alias(f'telegram:{self.bot.bot_id}:message')
+                if ident is not None:
+                    kw['reply_to_message_id'] = int(split_ident(ident)[3])
+            self.bot.bot.sendMessage(**kw)
         else:
             logger.warning(f'ignored message: {msg}')
-    def on_update(self, msg: telegram.Message):
-        pass
 
 class TelegramUser(User):
     def __init__(self):
@@ -87,13 +100,17 @@ class TelegramUser(User):
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
+        # todo: non-text
+        if not tm.text:
+            return None
         msg = Message({
             'text': tm.text,
             'origin': f'{bot.ident()}:chan:{tm.chat.id}',
             'user': f'telegram:user:{tm.from_user.id}'
             })
         if tm.reply_to_message:
-            msg['reply_to'] = Message.query_alias(f'telegram:message:{bot.bot_id}:{tm.message_id}')
-        msg.add_alias('tele
+            msg['reply_to'] = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
+        msg.add_alias(f'telegram:{bot.bot_id}:message:{tm.message_id}')
+        msg.persist()
         return msg
     return None
