@@ -1,6 +1,6 @@
 import logging
 from core import *
-from secret import *
+import secret
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,6 +14,6 @@ pm.load('telegram')
 
 telegram = query_object('telegram')
 
-telegram.newbot(TELEGRAM_TOKEN)
+telegram.newbot(secret.TELEGRAM_TOKEN)
 
 event_loop.run_forever()
