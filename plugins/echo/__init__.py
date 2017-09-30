@@ -20,9 +20,7 @@ class Echo(Channel):
 def initialize():
     echo = Echo()
     register_root(echo)
-    query_object('global_hook').add_listener(echo)
 
 def finalize():
     echo = query_object('echo')
-    query_object('global_hook').remove_listener(echo)
     unregister_root(echo)

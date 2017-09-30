@@ -20,6 +20,8 @@ class TelegramNS:
     def query(ids):
         if len(ids) < 2:
             raise Exception('not found')
+        if ids[0] == 'user':
+            return TelegramUser.query(ids[1:])
         bot = query_object(f'telegram:{ids[0]}')
         return bot.query(ids[1:])
     def newbot(token):
@@ -77,6 +79,8 @@ class TelegramChannel(Channel):
         elif 'image' in msg['content']:
             pass # todo: sendphoto
         elif 'text' in msg['content']:
+            if len(msg['content']['text']) == 0:
+                return
             kw = {'chat_id': self.chat_id, 'text': msg['content']['text']}
             if 'reply_to' in msg:
                 rep_msg = query_object(msg['reply_to'])
@@ -88,20 +92,38 @@ class TelegramChannel(Channel):
             logger.warning(f'ignored message: {msg}')
 
 class TelegramUser(User):
-    def __init__(self):
+    def query(ids):
+        return TelegramUser(int(ids[0]))
+    def __init__(self, uid, data=None):
+        self.uid = uid
+        if data is None:
+            data = db.get_json(self.ident())
+        if data is None:
+            data = {}
+        data['uid'] = uid
+        self.data = data
         cache_object(self)
+        self.persist()
     def ident(self):
-        pass
+        return f'telegram:user:{self.uid}'
     def persist(self):
-        pass
+        db.put_json(self.ident(), self.data)
     def on_uncache(self):
         self.persist()
     def display_name(self):
-        pass
+        name = '<unknown>'
+        if 'username' in self.data and self.data['username'] is not None:
+            name = self.data['username']
+        elif 'firsti_name' in self.data and self.data['first_name'] is not None:
+            name = self.data['first_name']
+        elif 'last_name' in self.data and self.data['last_name'] is not None:
+            name = self.data['last_name']
+        return name
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
+        update_user(tm.from_user)
         # todo: non-text
         if not tm.text:
             return None
@@ -118,3 +140,11 @@ def telegram2message(update: telegram.Update, bot: TelegramBot):
         msg.persist()
         return msg
     return None
+
+def update_user(u: telegram.User):
+    TelegramUser(u.id, {
+        'first_name': u.first_name,
+        'last_name': u.last_name,
+        'username': u.username
+        })
+
