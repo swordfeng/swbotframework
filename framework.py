@@ -86,7 +86,7 @@ class Message(dict):
     '''
     def query(ids):
         uuid = ids[0]
-        data = db.get_json(uuid)
+        data = db.get_json(join_ident(['message', uuid]))
         return Message(data, uuid)
 
     def ident(self=None):
@@ -122,9 +122,7 @@ class Message(dict):
         return None
     def query_alias(alias):
         ident = db.get(alias)
-        if ident is not None:
-            return query_object(ident)
-        return None
+        return ident
     def info(self):
         i = dict(self)
         i['content'] = '<hidden>'
