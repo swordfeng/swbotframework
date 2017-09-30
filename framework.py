@@ -126,7 +126,9 @@ class Message(dict):
             return query_object(ident)
         return None
     def info(self):
-        return f'Type: Message\nID: {self.ident()}\n{self}'
+        i = dict(self)
+        i['content'] = '<hidden>'
+        return f'Type: Message\nID: {self.ident()}\n{i}'
 register_root(Message)
 
 class User:
