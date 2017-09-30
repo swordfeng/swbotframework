@@ -9,7 +9,7 @@ logger = logging.getLogger('main')
 pm = query_object('pm')
 
 pm.load('global_hook')
-pm.load('echo')
+pm.load('simple_manager')
 pm.load('telegram')
 
 telegram = query_object('telegram')
