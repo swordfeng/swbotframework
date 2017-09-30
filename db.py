@@ -13,7 +13,7 @@ with conn:
 def get(key: str):
     with conn:
         for row in conn.execute('SELECT value FROM kv WHERE key = ?', [key]):
-            return row['value']
+            return row[0]
         return None
 
 def put(key: str, value: str):
