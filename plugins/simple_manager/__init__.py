@@ -43,7 +43,7 @@ def handle(cmd, msg, chan):
         obj = query_object(item)
         if obj is None:
             return 'object not found'
-        if not hasattr(obj, info):
+        if not hasattr(obj, 'info'):
             return 'object found, but I don\'t know what is it'
         return obj.info()
     return 'unrecognized command'
