@@ -65,17 +65,19 @@ class TelegramChannel(Channel):
         self.chat = chat
         self.chat_id = chat.id
         super().__init__() # load config, cache
-        self.add_listener(query_object('echo')) # todo: remove
     def ident(self):
         return f'{self.bot.ident()}:chan:{self.chat_id}'
     def send_message(self, msg: Message, chan: Channel):
         logger.info(f'{self.ident()} send: {msg}')
-        if 'file' in msg:
+        if 'content' not in msg:
+            # non-chat message
+            return
+        if 'file' in msg['content']:
             pass # todo: senddocuemnt
-        elif 'image' in msg:
+        elif 'image' in msg['content']:
             pass # todo: sendphoto
-        elif 'text' in msg:
-            kw = {'chat_id': self.chat_id, 'text': msg['text']}
+        elif 'text' in msg['content']:
+            kw = {'chat_id': self.chat_id, 'text': msg['content']['text']}
             if 'reply_to' in msg:
                 rep_msg = query_object(msg['reply_to'])
                 ident = rep_msg.get_alias(f'telegram:{self.bot.bot_id}:message')
@@ -104,7 +106,9 @@ def telegram2message(update: telegram.Update, bot: TelegramBot):
         if not tm.text:
             return None
         msg = Message({
-            'text': tm.text,
+            'content': {
+                'text': tm.text
+                },
             'origin': f'{bot.ident()}:chan:{tm.chat.id}',
             'user': f'telegram:user:{tm.from_user.id}'
             })

@@ -2,29 +2,26 @@ import json
 import os
 import urllib
 import urllib.parse
+import sqlite3
 
 db_name = 'persistence'
+conn = sqlite3.connect(f'{db_name}.db')
 
-if not os.path.exists(db_name):
-    os.mkdir(db_name)
+with conn:
+    conn.execute('CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT)')
 
 def get(key: str):
-    fkey = urllib.parse.quote(key, '')
-    fname = os.path.join(db_name, fkey)
-    if not os.path.exists(fname):
+    with conn:
+        for row in conn.execute('SELECT value FROM kv WHERE key = ?', [key]):
+            return row['value']
         return None
-    with open(fname, 'r') as f:
-        return f.read()
 
 def put(key: str, value: str):
-    fkey = urllib.parse.quote(key, '')
-    fname = os.path.join(db_name, fkey)
-    if value is None:
-        if os.path.exists(fname):
-            os.remove(fname)
-        return
-    with open(fname, 'w') as f:
-        return f.write(value)
+    with conn:
+        if value is not None:
+            conn.execute('INSERT OR REPLACE INTO kv (key, value) VALUES (?, ?)', [key, value])
+        else:
+            conn.execute('DELETE FROM kv WHERE key = ?', [key])
 
 def get_json(key: str):
     v = get(key)

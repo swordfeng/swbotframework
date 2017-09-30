@@ -76,7 +76,8 @@ class Message(dict):
     Message is a json object with some helper functions.
     There are some important json properties that decides
     the content of the message.
-    text: text content of the message
+    content: content of the message
+        .text: text content
     origin: ident of origin channel
     user: ident of user
     reply_to: ident of user the message is replying to

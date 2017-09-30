@@ -1,5 +1,5 @@
 __pycache__/
 .vscode/
 virtualenv/
-persistence/
+persistence.db
 secret.py
