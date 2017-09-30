@@ -93,7 +93,7 @@ class TelegramChannel(Channel):
         else:
             logger.warning(f'ignored message: {msg}')
     def info(self):
-        return super().info() + f'Bot: {self.bot.ident()}'
+        return super().info() + f'\nBot: {self.bot.ident()}'
 
 class TelegramUser(User):
     def query(ids):
@@ -126,11 +126,11 @@ class TelegramUser(User):
     def info(self):
         i = super().info()
         if 'username' in self.data and self.data['username'] is not None:
-            i += 'Username: ' + self.data['username']
+            i += '\nUsername: ' + self.data['username']
         elif 'first_name' in self.data and self.data['first_name'] is not None:
-            i += 'First Name: ' + self.data['first_name']
+            i += '\nFirst Name: ' + self.data['first_name']
         elif 'last_name' in self.data and self.data['last_name'] is not None:
-            i += 'Last Name: ' + self.data['last_name']
+            i += '\nLast Name: ' + self.data['last_name']
         return i
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
