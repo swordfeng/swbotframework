@@ -16,12 +16,18 @@ def cache_object(obj):
         del(cache[ident])
         if hasattr(obj, 'on_uncache'):
             obj.on_uncache()
+    if ident in cache and cache[ident]() is not obj:
+        logger.error('different object with same identifier!')
+        # todo: raise
     cache[ident] = weakref.ref(obj, obj_cleanup)
 
 def uncache_object(obj):
     ident = obj.ident()
     assert_ident(ident)
     logger.info(f'uncache: {ident}')
+    if ident in cache and cache[ident]() is not obj:
+        logger.error('different object with same identifier!')
+        # todo: raise
     del(cache[ident])
     if hasattr(obj, 'on_uncache'):
         obj.on_uncache()
@@ -49,10 +55,16 @@ def register_root(obj):
     name = obj.ident()
     assert_name(name)
     logger.info(f'register_root: {name}')
+    if name in root_namespace:
+        logger.error('duplicated root object!')
+        # todo: raise
     root_namespace[name] = obj
 
 def unregister_root(obj):
     name = obj.ident()
     assert_name(name)
     logger.info(f'unregister_root: {name}')
+    if name in root_namespace and root_namespace[name] is not obj:
+        logger.error('wrong root object!')
+        # todo: raise
     del(root_namespace[name])
