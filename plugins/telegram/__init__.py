@@ -45,9 +45,9 @@ class TelegramBot:
     async def worker(self):
         while True:
             try:
-                logger.info('poll')
+                logger.debug('poll')
                 updates = await async_execute(self.bot.getUpdates, offset=self.last_update)
-                logger.info('updates')
+                logger.debug('updates')
                 for update in updates:
                     if update.update_id >= self.last_update:
                         self.last_update = update.update_id + 1
