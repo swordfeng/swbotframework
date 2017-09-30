@@ -70,6 +70,8 @@ class Channel:
         raise NotImplemented()
     def send_message(self, msg: 'Message', chan: 'Channel'):
         raise NotImplemented()
+    def info(self):
+        return f'Type: Channel\nID: {self.ident()}'
 
 class Message(dict):
     '''
@@ -123,6 +125,8 @@ class Message(dict):
         if ident is not None:
             return query_object(ident)
         return None
+    def info(self):
+        return f'Type: Message\nID: {self.ident()}\n{self}'
 register_root(Message)
 
 class User:
@@ -132,4 +136,6 @@ class User:
         raise NotImplemented()
     def avatar(self):
         raise NotImplemented()
+    def info(self):
+        return f'Type: User\nID: {self.ident()}\nDisplay Name: {self.display_name()}'
 

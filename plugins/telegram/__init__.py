@@ -60,6 +60,8 @@ class TelegramBot:
                 logger.info('poll timeout')
             except:
                 logger.exception('worker exception')
+    def info(self):
+        return f'Type: telegram bot\nID: {self.ident()}'
 
 class TelegramChannel(Channel):
     def __init__(self, chat: telegram.Chat, bot: TelegramBot):
@@ -90,6 +92,8 @@ class TelegramChannel(Channel):
             self.bot.bot.sendMessage(**kw)
         else:
             logger.warning(f'ignored message: {msg}')
+    def info(self):
+        return super().info() + f'Bot: {self.bot.ident()}'
 
 class TelegramUser(User):
     def query(ids):
@@ -114,11 +118,20 @@ class TelegramUser(User):
         name = '<unknown>'
         if 'username' in self.data and self.data['username'] is not None:
             name = self.data['username']
-        elif 'firsti_name' in self.data and self.data['first_name'] is not None:
+        elif 'first_name' in self.data and self.data['first_name'] is not None:
             name = self.data['first_name']
         elif 'last_name' in self.data and self.data['last_name'] is not None:
             name = self.data['last_name']
         return name
+    def info(self):
+        i = super().info()
+        if 'username' in self.data and self.data['username'] is not None:
+            i += 'Username: ' + self.data['username']
+        elif 'first_name' in self.data and self.data['first_name'] is not None:
+            i += 'First Name: ' + self.data['first_name']
+        elif 'last_name' in self.data and self.data['last_name'] is not None:
+            i += 'Last Name: ' + self.data['last_name']
+        return i
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
