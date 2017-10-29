@@ -1,5 +1,6 @@
 import logging
 from core import *
+from core import _
 import secret
 
 logging.basicConfig(level=logging.INFO)

@@ -1,4 +1,5 @@
 from core import *
+from core import _
 import logging
 
 logger = logging.getLogger('simple_manager')
