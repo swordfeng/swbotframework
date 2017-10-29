@@ -1,4 +1,5 @@
 from core import *
+from core import _
 import logging
 
 logger = logging.getLogger('global_hook')
@@ -11,7 +12,7 @@ class GlobalHook(Channel):
             return
         for chanId in self.listeners:
             try:
-                self.listeners[chanId].send_message(msg, chan)
+                _(chanId).send_message(msg, chan)
             except:
                 logger.exception(f'Error sending message to {chanId}')
 
