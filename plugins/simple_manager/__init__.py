@@ -48,6 +48,9 @@ def get_info(obj):
     klass = type(obj)
     cname = f'{klass.__module__}.{klass.__name__}'
     info = f'ID: {obj.ident()}\nType: {cname}'
+    if klass is type:
+        name = f'{obj.__module__}.{obj.__name__}'
+        info += f'\nName: {name}'
     try:
         if hasattr(obj, 'info'):
             moreinfo = obj.info()
