@@ -73,7 +73,7 @@ class Channel:
     def send_message(self, msg: 'Message', chan: 'Channel'):
         raise NotImplemented()
     def info(self):
-        return f'Type: Channel\nID: {self.ident()}'
+        return f'Listeners: {list(self.listeners)}'
 
 @cacheable
 class Message(dict):
@@ -129,7 +129,7 @@ class Message(dict):
     def info(self):
         i = dict(self)
         i['content'] = '<hidden>'
-        return f'Type: Message\nID: {self.ident()}\n{i}'
+        return str(i)
 register_root(Message)
 
 @cacheable
@@ -141,5 +141,5 @@ class User:
     def avatar(self):
         raise NotImplemented()
     def info(self):
-        return f'Type: User\nID: {self.ident()}\nDisplay Name: {self.display_name()}'
+        return f'Display Name: {self.display_name()}'
 
