@@ -4,8 +4,11 @@ import logging
 
 logger = logging.getLogger('namespace')
 
+root_namespace = {}
 cache = {}
-lru_cache = list(map(lambda x: None, range(0, 16)))
+cache_names = {}
+lru_cache = list(map(lambda x: None, range(0, 8)))
+
 def cache_object(obj):
     ident = obj.ident()
     assert_ident(ident)
@@ -13,36 +16,50 @@ def cache_object(obj):
     if ident in cache and cache[ident]() is not obj:
         logger.error('different object with same identifier!')
         # todo: raise
+    # add to cache
     cache[ident] = weakref.ref(obj, uncache_object)
+    # add to lru
     obj_pos = 0
     for i in range(1, len(lru_cache)):
         lru_obj = lru_cache[i]
         if obj is lru_obj:
             obj_pos = i
             break
-    for i in range(obj_pos+1, len(lru_cache)):
-        lru_cache[i-1] = lru_cache[i]
+        elif obj is None:
+            obj_pos = i
+    for i in range(obj_pos, len(lru_cache)-1):
+        lru_cache[i] = lru_cache[i+1]
     lru_cache[len(lru_cache)-1] = obj
+    # add to names
+    name = head_ident(ident)
+    if name not in cache_names:
+        cache_names[name] = set()
+    cache_names[name].add(ident)
 
 def uncache_object(obj):
+    byGC = False
     if isinstance(obj, weakref.ref):
         obj = obj()
+        byGC = True
     ident = obj.ident()
     assert_ident(ident)
-    logger.info(f'uncache: {ident}')
+    logger.info(f'uncache{"(GC)" if byGC else ""}: {ident}')
     if ident in cache and cache[ident]() is not obj:
         logger.error('different object with same identifier!')
         # todo: raise
+    if hasattr(obj, 'on_uncache'):
+        obj.on_uncache()
+    # remove from cache
     del(cache[ident])
+    # remove from lru
     for i in range(0, len(lru_cache)):
         lru_obj = lru_cache[i]
         if obj is lru_obj:
             lru_cache[i] = None
             break
-    if hasattr(obj, 'on_uncache'):
-        obj.on_uncache()
-
-root_namespace = {}
+    # remove from names
+    name = head_ident(ident)
+    cache_names[name].discard(ident)
 
 def query_object(ident):
     assert_ident(ident)
@@ -57,7 +74,7 @@ def query_object(ident):
         if len(ids) == 1:
             return ns
         obj = ns.query(ids[1:])
-        if hasattr(obj, 'cacheable') and obj.cacheable:
+        if hasattr(obj, 'Cacheable') and obj.Cacheable:
             cache_object(obj)
         return obj
     except:
@@ -88,3 +105,10 @@ def unregister_root(obj):
     if hasattr(obj, 'on_unregister_root'):
         obj.on_unregister_root()
     del(root_namespace[name])
+    # remove names
+    if name in cache_names:
+        for ident in list(cache_names[name]):
+            obj = cache[ident]()
+            if obj is not None:
+                uncache_object(obj)
+    del(cache_names[name])
