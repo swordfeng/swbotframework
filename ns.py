@@ -17,7 +17,7 @@ def cache_object(obj):
         logger.error('different object with same identifier!')
         # todo: raise
     # add to cache
-    cache[ident] = weakref.ref(obj, uncache_object)
+    cache[ident] = weakref.ref(obj)
     # add to lru
     obj_pos = 0
     for i in range(1, len(lru_cache)):
@@ -36,11 +36,7 @@ def cache_object(obj):
         cache_names[name] = set()
     cache_names[name].add(ident)
 
-def uncache_object(obj):
-    byGC = False
-    if isinstance(obj, weakref.ref):
-        obj = obj()
-        byGC = True
+def uncache_object(obj, byGC=False):
     ident = obj.ident()
     assert_ident(ident)
     logger.info(f'uncache{"(GC)" if byGC else ""}: {ident}')
@@ -63,10 +59,21 @@ def uncache_object(obj):
 
 def cacheable(klass):
     original_init = klass.__init__
-    def init(self, *args, **kw):
+    def new_init(self, *args, **kw):
         original_init(self, *args, **kw)
         cache_object(self)
-    klass.__init__ = init
+    klass.__init__ = new_init
+    original_del = None
+    if hasattr(klass, '__del__'):
+        original_del = klass.__del__
+    def new_del(self, *args, **kw):
+        ident = self.ident()
+        if ident in cache and cache[ident]() is self:
+            uncache_object(self, byGC=True)
+        if original_del is None:
+            return
+        original_del(self, *args, **kw)
+    klass.__del__ = new_del
     return klass
 
 def query_object(ident, suppress_error=True):
