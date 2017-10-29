@@ -4,6 +4,7 @@ from ns import *
 import plugin_manager
 from uuid import uuid1
 import db
+import yaml
 
 logger = logging.getLogger('framework')
 
@@ -129,7 +130,7 @@ class Message(dict):
     def info(self):
         i = dict(self)
         i['content'] = '<hidden>'
-        return str(i)
+        return yaml.dump(i)
 register_root(Message)
 
 @cacheable
