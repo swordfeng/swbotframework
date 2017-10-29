@@ -8,8 +8,9 @@ import db
 logger = logging.getLogger('framework')
 
 class Channel:
+    Cacheable = True
     def __init__(self):
-        self.listeners = {}
+        self.listeners = set()
         self.config = db.get_json(self.ident())
         if self.config is None:
             self.config = {}
@@ -17,7 +18,6 @@ class Channel:
             self.config['listeners'] = []
         if 'to_listen' not in self.config:
             self.config['to_listen'] = []
-        cache_object(self)
         for ident in self.config['listeners']:
             chan = query_object(ident)
             if chan is not None:
@@ -29,7 +29,7 @@ class Channel:
     def add_listener(self, chan: 'Channel'):
         logger.info(f'{self.ident()} add_listener: {chan.ident()}')
         chanId = chan.ident()
-        self.listeners[chanId] = chan
+        self.listeners.add(chanId)
     def enable_listener(self, chan):
         chanId = chan.ident()
         logger.info(f'{self.ident()} enable_listener: {chan.ident()}')
@@ -42,7 +42,7 @@ class Channel:
     def remove_listener(self, chan: 'Channel'):
         logger.info(f'{self.ident()} remove_listener: {chan.ident()}')
         chanId = chan.ident()
-        del(self.listeners[chanId])
+        self.listeners.discard(chanId)
     def disable_listener(self, chan):
         chanId = chan.ident()
         logger.info(f'{self.ident()} disable_listener: {chan.ident()}')
@@ -56,12 +56,14 @@ class Channel:
         logger.info(f'{self.ident()} on_receive: {msg}')
         for chanId in self.listeners:
             try:
-                self.listeners[chanId].send_message(msg, self)
+                chan = query_object(chanId)
+                if chan is not None:
+                    chan.send_message(msg, self)
             except:
                 logger.exception(f'Error sending message to {chanId}')
-        glb = query_object('global_hook')
-        if glb is not None:
-            glb.send_message(msg, self)
+        global_hook = query_object('global_hook')
+        if global_hook is not None:
+            global_hook.send_message(msg, self)
     def on_uncache(self):
         self.persist()
     def persist(self):
@@ -84,6 +86,7 @@ class Message(dict):
     user: ident of user
     reply_to: ident of user the message is replying to
     '''
+    Cacheable = True
     def query(ids):
         uuid = ids[0]
         data = db.get_json(join_ident(['message', uuid]))
@@ -99,7 +102,6 @@ class Message(dict):
         if uuid == None:
             uuid = str(uuid1())
         self.uuid = uuid
-        cache_object(self)
         self.persist()
     def on_uncache(self):
         self.persist()
@@ -130,6 +132,7 @@ class Message(dict):
 register_root(Message)
 
 class User:
+    Cacheable = True
     def ident(self):
         raise NotImplemented()
     def display_name(self):
