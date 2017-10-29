@@ -75,6 +75,8 @@ def register_root(obj):
         logger.error('duplicated root object!')
         # todo: raise
     root_namespace[name] = obj
+    if hasattr(obj, 'on_register_root'):
+        obj.on_register_root()
 
 def unregister_root(obj):
     name = obj.ident()
@@ -83,4 +85,6 @@ def unregister_root(obj):
     if name in root_namespace and root_namespace[name] is not obj:
         logger.error('wrong root object!')
         # todo: raise
+    if hasattr(obj, 'on_unregister_root'):
+        obj.on_unregister_root()
     del(root_namespace[name])
