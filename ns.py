@@ -61,6 +61,9 @@ def query_object(ident):
         logger.info('query_object', exc_info=True)
         return None
 
+def _(ident):
+    return query_object(ident)
+
 def register_root(obj):
     name = obj.ident()
     assert_name(name)
