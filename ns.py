@@ -5,23 +5,28 @@ import logging
 logger = logging.getLogger('namespace')
 
 cache = {}
-
+lru_cache = list(map(lambda x: None, range(0, 16)))
 def cache_object(obj):
     ident = obj.ident()
     assert_ident(ident)
     logger.info(f'cache: {ident}')
-    def obj_cleanup(ref):
-        logger.info(f'uncache(GC): {ident}')
-        obj = ref()
-        del(cache[ident])
-        if hasattr(obj, 'on_uncache'):
-            obj.on_uncache()
     if ident in cache and cache[ident]() is not obj:
         logger.error('different object with same identifier!')
         # todo: raise
-    cache[ident] = weakref.ref(obj, obj_cleanup)
+    cache[ident] = weakref.ref(obj, uncache_object)
+    obj_pos = 0
+    for i in range(1, len(lru_cache)):
+        lru_obj = lru_cache[i]
+        if obj is lru_obj:
+            obj_pos = i
+            break
+    for i in range(obj_pos+1, len(lru_cache)):
+        lru_cache[i-1] = lru_cache[i]
+    lru_cache[len(lru_cache)-1] = obj
 
 def uncache_object(obj):
+    if isinstance(obj, weakref.ref):
+        obj = obj()
     ident = obj.ident()
     assert_ident(ident)
     logger.info(f'uncache: {ident}')
@@ -29,6 +34,11 @@ def uncache_object(obj):
         logger.error('different object with same identifier!')
         # todo: raise
     del(cache[ident])
+    for i in range(0, len(lru_cache)):
+        lru_obj = lru_cache[i]
+        if obj is lru_obj:
+            lru_cache[i] = None
+            break
     if hasattr(obj, 'on_uncache'):
         obj.on_uncache()
 
