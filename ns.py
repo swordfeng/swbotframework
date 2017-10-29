@@ -61,6 +61,14 @@ def uncache_object(obj):
     name = head_ident(ident)
     cache_names[name].discard(ident)
 
+def cacheable(klass):
+    original_init = klass.__init__
+    def init(self, *args, **kw):
+        original_init(self, *args, **kw)
+        cache_object(self)
+    klass.__init__ = init
+    return klass
+
 def query_object(ident, suppress_error=True):
     assert_ident(ident)
     logger.info(f'query_object: {ident}')
@@ -74,8 +82,6 @@ def query_object(ident, suppress_error=True):
         if len(ids) == 1:
             return ns
         obj = ns.query(ids[1:])
-        if hasattr(obj, 'Cacheable') and obj.Cacheable:
-            cache_object(obj)
         return obj
     except:
         logger.info('query_object', exc_info=True)

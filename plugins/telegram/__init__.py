@@ -1,4 +1,5 @@
 from core import *
+from core import _
 import db
 import logging
 import telegram
@@ -22,7 +23,7 @@ class TelegramNS:
             return None
         if ids[0] == 'user':
             return TelegramUser.query(ids[1:])
-        bot = query_object(f'telegram:{ids[0]}')
+        bot = _(f'telegram:{ids[0]}')
         return bot.query(ids[1:])
     def newbot(token):
         bot = TelegramBot(token)
@@ -31,8 +32,8 @@ class TelegramNS:
         for bot_id in bots:
             bots[bot_id].kill()
 
+@cacheable
 class TelegramBot:
-    Cacheable = True
     def __init__(self, token):
         self.token = token
         self.bot = telegram.Bot(token)
@@ -118,6 +119,7 @@ class TelegramUser(User):
         data['uid'] = uid
         self.data = data
         self.persist()
+        super().__init__()
     def ident(self):
         return f'telegram:user:{self.uid}'
     def persist(self):

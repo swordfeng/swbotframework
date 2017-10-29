@@ -7,8 +7,8 @@ import db
 
 logger = logging.getLogger('framework')
 
+@cacheable
 class Channel:
-    Cacheable = True
     def __init__(self):
         self.listeners = set()
         self.config = db.get_json(self.ident())
@@ -75,6 +75,7 @@ class Channel:
     def info(self):
         return f'Type: Channel\nID: {self.ident()}'
 
+@cacheable
 class Message(dict):
     '''
     Message is a json object with some helper functions.
@@ -131,8 +132,8 @@ class Message(dict):
         return f'Type: Message\nID: {self.ident()}\n{i}'
 register_root(Message)
 
+@cacheable
 class User:
-    Cacheable = True
     def ident(self):
         raise NotImplemented()
     def display_name(self):
