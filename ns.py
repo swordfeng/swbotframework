@@ -56,7 +56,10 @@ def query_object(ident):
         ns = root_namespace[ids[0]]
         if len(ids) == 1:
             return ns
-        return ns.query(ids[1:])
+        obj = ns.query(ids[1:])
+        if hasattr(obj, 'cacheable') and obj.cacheable:
+            cache_object(obj)
+        return obj
     except:
         logger.info('query_object', exc_info=True)
         return None
