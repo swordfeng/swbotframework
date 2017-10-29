@@ -1,14 +1,13 @@
 from core import *
+import logging
+
+logger = logging.getLogger('simple_manager')
 
 class SimpleManager(Channel):
     def ident(self):
         return 'simple_manager'
     def send_message(self, msg, chan):
-        if 'content' not in msg:
-            return
-        if 'text' not in msg['content']:
-            return
-        if msg['origin'] != chan.ident():
+        if 'content' not in msg or 'text' not in msg['content'] or msg['origin'] != chan.ident():
             return
         cmd = msg['content']['text']
         if not cmd.startswith('sm:'):
@@ -23,37 +22,42 @@ class SimpleManager(Channel):
             'origin': self.ident()
             })
         chan.send_message(rep, chan)
+    def on_register_root(self):
+        query_object('global_hook').add_listener(self)
+    def on_unregister_root(self):
+        query_object('global_hook').remove_listener(self)
 
 def handle(cmd, msg, chan):
     cmds = cmd.split(' ')
     if len(cmds) == 0:
-        return 'command required'
+        return 'Command required'
     if cmds[0] == 'info':
         item = None
         if len(cmds) > 1:
             item = cmds[1]
         else:
             item = msg.ident()
-        #result = ''
-        #if 'user' in msg and msg['user'] is not None:
-        #    user = query_object(msg['user'])
-        #    result += f'User ID: {user.ident()}\nUser Name: {user.display_name()}\n'
-        #result += f'Origin Channel: {msg["origin"]}\nDirect Channel: {chan.ident()}\n'
-        #result += f'Message ID: {msg.ident()}\nMessage: {msg}'
         obj = query_object(item)
         if obj is None:
-            return 'object not found'
-        if not hasattr(obj, 'info'):
-            return 'object found, but I don\'t know what is it'
-        return obj.info()
-    return 'unrecognized command'
+            return 'Object not found'
+        return get_info(obj)
+    return 'Unrecognized command'
 
+def get_info(obj):
+    klass = type(obj)
+    cname = f'{klass.__module__}.{klass.__name__}'
+    info = f'ID: {obj.ident()}\nType: {cname}'
+    try:
+        if hasattr(obj, 'info'):
+            moreinfo = obj.info()
+            info += '\n'
+            info += moreinfo
+    except:
+        logger.exception(f'Bad info()')
+    return info
 
 def initialize():
-    sm = SimpleManager()
-    register_root(sm)
-    query_object('global_hook').add_listener(sm)
+    register_root(SimpleManager())
+    
 def finalize():
-    sm = query_object('simple_manager')
-    query_object('global_hook').remove_listener(sm)
-    unregister_root(sm)
+    unregister_root(_('simple_manager'))
