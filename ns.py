@@ -61,7 +61,7 @@ def uncache_object(obj):
     name = head_ident(ident)
     cache_names[name].discard(ident)
 
-def query_object(ident):
+def query_object(ident, suppress_error=True):
     assert_ident(ident)
     logger.info(f'query_object: {ident}')
     try:
@@ -79,10 +79,16 @@ def query_object(ident):
         return obj
     except:
         logger.info('query_object', exc_info=True)
-        return None
+        if suppress_error:
+            return None
+        else:
+            raise
 
 def _(ident):
-    return query_object(ident)
+    obj = query_object(ident, suppress_error=False)
+    if obj is None:
+        raise ValueError('Object not found')
+    return obj
 
 def register_root(obj):
     name = obj.ident()
