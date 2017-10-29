@@ -19,3 +19,12 @@ def join_ident(ids: list):
     for name in ids:
         assert_name(name)
     return ':'.join(ids)
+
+def head_ident(ident: str):
+    assert_ident(ident)
+    sep = len(ident)
+    try:
+        sep = ident.index(':')
+    except ValueError:
+        pass
+    return ident[:sep]
