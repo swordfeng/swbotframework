@@ -12,7 +12,7 @@ pm.load('global_hook')
 pm.load('simple_manager')
 pm.load('telegram')
 
-telegram = query_object('telegram')
+telegram = _('telegram')
 
 telegram.newbot(secret.TELEGRAM_TOKEN)
 
