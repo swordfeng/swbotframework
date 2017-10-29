@@ -19,7 +19,7 @@ class TelegramNS:
         return 'telegram'
     def query(ids):
         if len(ids) < 2:
-            raise Exception('not found')
+            return None
         if ids[0] == 'user':
             return TelegramUser.query(ids[1:])
         bot = query_object(f'telegram:{ids[0]}')
@@ -27,21 +27,30 @@ class TelegramNS:
     def newbot(token):
         bot = TelegramBot(token)
         TelegramNS.bots[bot.bot_id] = bot
+    def on_unregister_root():
+        for bot_id in bots:
+            bots[bot_id].kill()
 
 class TelegramBot:
+    Cacheable = True
     def __init__(self, token):
         self.token = token
         self.bot = telegram.Bot(token)
         self.bot_id = self.token.split(':')[0]
         self.last_update = 0
+        self.running = True
         self.task = asyncio.ensure_future(self.worker(), loop=event_loop)
-        cache_object(self)
     def ident(self):
         return 'telegram:' + self.bot_id
     def query(self, ids):
         if ids[0] == 'chan':
             chat = self.bot.getChat(chat_id=ids[1])
             return TelegramChannel(chat, self)
+        elif ids[0] == 'message':
+            return Message.query_alias(join_ident(['telegram', self.bot_id, 'message', ids[1]]))
+    def kill(self):
+        self.running = False
+        self.task.cancel()
     async def worker(self):
         while True:
             try:
@@ -58,6 +67,8 @@ class TelegramBot:
                         chan.on_receive(msg)
             except telegram.error.TimedOut:
                 logger.info('poll timeout')
+            except asyncio.CancelledError:
+                break
             except:
                 logger.exception('worker exception')
     def info(self):
@@ -106,7 +117,6 @@ class TelegramUser(User):
             data = {}
         data['uid'] = uid
         self.data = data
-        cache_object(self)
         self.persist()
     def ident(self):
         return f'telegram:user:{self.uid}'
