@@ -1,58 +1,30 @@
 from core import *
 from core import _
 import logging
+from general_handler import *
 
 logger = logging.getLogger('simple_manager')
 
-class SimpleManager(Channel):
-    def ident(self):
-        return 'simple_manager'
-    def send_message(self, msg, chan):
-        if 'content' not in msg or 'text' not in msg['content'] or msg['origin'] != chan.ident():
-            return
-        cmd = msg['content']['text']
-        if not cmd.startswith('sm:'):
-            return
-        cmd = cmd[3:].strip()
-        result = handle(cmd, msg, chan)
-        rep = Message({
-            'content': {
-                'text': result
-                },
-            'reply_to': msg.ident(),
-            'origin': self.ident()
-            })
-        chan.send_message(rep, chan)
-    def on_register_root(self):
-        query_object('global_hook').add_listener(self)
-    def on_unregister_root(self):
-        query_object('global_hook').remove_listener(self)
-
-def handle(cmd, msg, chan):
-    cmds = cmd.split(' ')
-    if len(cmds) == 0:
-        return 'Command required'
-    if cmds[0] == 'help':
-        return '''Simple Manager
+class SimpleManager(GeneralHandler):
+    def __init__(self):
+        super().__init__(self)
+        self.register(info)
+    name = 'simple_manager'
+    prompt = 'sm:'
+    description = '''Simple Manager
 developed by swordfeng
-Home: https://github.com/swordfeng/swbotframework/tree/master/plugins/simple_manager
-Available commands: help, info'''
-    if cmds[0] == 'info':
-        item = None
-        if len(cmds) > 1:
-            item = cmds[1]
-        else:
-            item = msg.ident()
-        obj = query_object(item)
-        if obj is None:
-            return 'Object not found'
-        try:
-            info = get_info(obj)
-        except:
-            info = f'Error happened when getting info for {item}'
-            logger.exception(info)
-        return info
-    return 'Unrecognized command'
+Home: https://github.com/swordfeng/swbotframework/tree/master/plugins/simple_manager'''
+
+def info(cmds, msg, chan):
+    item = None
+    if len(cmds) > 0:
+        item = cmds[0]
+    else:
+        item = msg.ident()
+    obj = query_object(item)
+    if obj is None:
+        return 'Object not found'
+    return get_info(obj)
 
 def get_info(obj):
     klass = type(obj)

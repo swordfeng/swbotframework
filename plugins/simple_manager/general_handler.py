@@ -10,8 +10,8 @@ class GeneralHandler(Channel):
         self.logger = logging.getLogger(self.name)
         self.handlers = {}
         self.helpmsg = {}
-        handler(self.help, target=self, helpmsg='Show help')
         super().__init__(self)
+        self.register(self.help, helpmsg='Show help')
     def ident(self):
         return self.name
     def send_message(self, msg, chan):
@@ -21,11 +21,14 @@ class GeneralHandler(Channel):
         if not cmd.startswith(self.prompt):
             return
         cmds = cmd[len(self.prompt):].strip().split(' ')
-        try:
-            result = self.handle(cmds, msg, chan)
-        except:
-            self.logger.info(f'Unhandled command: {cmd}', exc_info=True)
-            result = 'Error happened when processing the command'
+        if len(cmds) == 0:
+            result = 'Command required'
+        else:
+            try:
+                result = self.handle(cmds, msg, chan)
+            except:
+                self.logger.info(f'Unhandled command: {cmd}', exc_info=True)
+                result = 'Error happened when processing the command'   
         rep = Message({
             'content': {
                 'text': result
@@ -43,15 +46,13 @@ class GeneralHandler(Channel):
             return f'Command {cmds[0]} not found'
         return self.handlers[cmds[0]](cmds[1:], msg, chan)
     def help(self):
-        result = self.description
+        result = self.description + '\nCommands:'
         for cmd in self.helpmsg:
-            result += f'{cmd}: {self.helpmsg[cmd]}'
+            result += f'\n- {cmd}: {self.helpmsg[cmd]}'
         return result
-
-def handler(func, target=None, name=None, helpmsg='No help'):
-    assert(isinstance(target, GeneralHandler))
-    if name is None:
-        name = func.__name__
-    target.handlers[name] = func
-    target.helpmsg[name] = helpmsg
-    return func
+    def register(self, func, name=None, helpmsg='No help'):
+        if name is None:
+            name = func.__name__
+        self.handlers[name] = func
+        self.helpmsg[name] = helpmsg
+        return self
