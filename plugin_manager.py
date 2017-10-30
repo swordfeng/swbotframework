@@ -47,8 +47,8 @@ def unload_plugin(name):
         raise
 
 def reload_plugin(name):
-    load(name)
-    unload(name)
+    load_plugin(name)
+    unload_plugin(name)
 
 def list_plugin():
     return {'loaded': loaded_plugins.keys(), 'enabled': list(enabled_plugins)}
@@ -80,10 +80,12 @@ class PluginManager:
         return enable_plugin(name)
     def disable(name):
         return disable_plugin(name)
-    def list(name):
-        return list_plugin(name)
+    def list():
+        return list_plugin()
+    def info():
+        return yamldump(PluginManager.list())
 register_root(PluginManager)
 
 for plugin_name in enabled_plugins:
-    load(plugin_name)
+    load_plugin(plugin_name)
 

@@ -1,4 +1,5 @@
 import re
+import yaml
 
 def assert_on_re(name: str, pattern: str):
     regex = re.compile(pattern)
@@ -28,3 +29,6 @@ def head_ident(ident: str):
     except ValueError:
         pass
     return ident[:sep]
+
+def yamldump(obj):
+    return yaml.dump(obj, default_flow_style=False)
