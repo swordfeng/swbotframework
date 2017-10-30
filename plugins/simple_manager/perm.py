@@ -1,4 +1,5 @@
 from core import *
+from core import _
 from .general_handler import *
 import logging
 
