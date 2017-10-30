@@ -1,5 +1,5 @@
 from core import *
-from general_handler import *
+from .general_handler import *
 import logging
 
 logger = logging.getLogger('permission')
@@ -37,7 +37,7 @@ class Role:
         db.put(self.ident(), None)
         self.uncache()
 
-    def assert(self, ident, args=[]):        
+    def assertion(self, ident, args=[]):        
         assert(self.check(ident, args))
     def check(self, ident, args=[]):
         assert_ident(ident)
@@ -167,6 +167,7 @@ Part of Simple Manager (simple_manager)'''
         self.register(revoke, helpmsg='revoke Role #')
         self.register(info, helpmsg='info Role')
     def exec(cmd: str):
+        logger.info(f'execute: {cmd}')
         try:
             cmds = cmd.split(' ')
             if len(cmds) < 2:
@@ -215,9 +216,7 @@ Part of Simple Manager (simple_manager)'''
                 _(f'permission:{role_name}').assign(entity, params, constraints)
                 return True
             elif cmds[0] == 'revoke':
-                role = cmds[1]
-                num = int(cmds[2])
-                _(f'permission:{role_name}').revoke(num)
+                role = _(f'permission:{cmds[1]}').revoke(int(cmds[2]))
                 return True
             else:
                 raise Exception('Bad command')
