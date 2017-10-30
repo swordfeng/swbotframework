@@ -32,6 +32,11 @@ def handle(cmd, msg, chan):
     cmds = cmd.split(' ')
     if len(cmds) == 0:
         return 'Command required'
+    if cmds[0] == 'help':
+        return '''Simple Manager
+developed by swordfeng
+Home: https://github.com/swordfeng/swbotframework/tree/master/plugins/simple_manager
+Available commands: help, info'''
     if cmds[0] == 'info':
         item = None
         if len(cmds) > 1:
