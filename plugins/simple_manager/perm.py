@@ -223,7 +223,7 @@ Part of Simple Manager (simple_manager)'''
             elif cmds[0] == 'test':
                 to_pos = cmds.index('to')
                 crole = ' '.join(cmds[1:to_pos]).strip()
-                centity = ' '.join(cmds[to_pos+1:where_pos]).strip()
+                centity = ' '.join(cmds[to_pos+1:]).strip()
                 role_name, params = parse_role(crole)
                 entity = centity
                 return _(f'permission:{role_name}').check(entity, params)
