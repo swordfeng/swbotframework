@@ -55,6 +55,8 @@ class Role:
                 resolved = {}
                 if entity.startswith('*'):
                     resolved[entity[1:]] = ident
+                elif entity != ident:
+                    continue
                 for idx in range(0, len(params)):
                     if params[idx].startswith('*'):
                         k = params[idx][1:]
@@ -62,6 +64,9 @@ class Role:
                             passed = False
                             break
                         resolved[params[idx][1:]] = args[idx]
+                    elif params[idx] != args[idx]:
+                        passed = False
+                        break
                 if not passed:
                     continue
                 for name in constraints:
