@@ -44,8 +44,8 @@ def initialize():
     register_root(SimpleManager())
     register_root(PermissionNS())
     if query_object(f'permission:SuperUser') is None:
-        PermissionNS.exec('addrole SuperUser')
-        PermissionNS.exec('assign SuperUser to telegram:user:109890321')        
+        PermissionNS.instance().exec('addrole SuperUser')
+        PermissionNS.instance().exec('assign SuperUser to telegram:user:109890321')        
     
 def finalize():
     unregister_root(_(SimpleManager.name))
