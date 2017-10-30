@@ -19,22 +19,25 @@ def cache_object(obj):
     # add to cache
     cache[ident] = weakref.ref(obj)
     # add to lru
+    lru_add(obj)
+    # add to names
+    name = head_ident(ident)
+    if name not in cache_names:
+        cache_names[name] = set()
+    cache_names[name].add(ident)
+
+def lru_add(obj):
     obj_pos = 0
     for i in range(1, len(lru_cache)):
         lru_obj = lru_cache[i]
         if obj is lru_obj:
             obj_pos = i
             break
-        elif obj is None:
+        elif lru_obj is None:
             obj_pos = i
     for i in range(obj_pos, len(lru_cache)-1):
         lru_cache[i] = lru_cache[i+1]
     lru_cache[len(lru_cache)-1] = obj
-    # add to names
-    name = head_ident(ident)
-    if name not in cache_names:
-        cache_names[name] = set()
-    cache_names[name].add(ident)
 
 def uncache_object(obj, byGC=False):
     ident = obj.ident()
@@ -48,14 +51,17 @@ def uncache_object(obj, byGC=False):
     # remove from cache
     del(cache[ident])
     # remove from lru
+    lru_remove(obj)
+    # remove from names
+    name = head_ident(ident)
+    cache_names[name].discard(ident)
+
+def lru_remove(obj):
     for i in range(0, len(lru_cache)):
         lru_obj = lru_cache[i]
         if obj is lru_obj:
             lru_cache[i] = None
             break
-    # remove from names
-    name = head_ident(ident)
-    cache_names[name].discard(ident)
 
 def cacheable(klass):
     original_init = klass.__init__
@@ -83,6 +89,7 @@ def query_object(ident, suppress_error=True):
         if ident in cache:
             obj = cache[ident]()
             if obj is not None:
+                lru_add(obj)
                 return obj
         ids = split_ident(ident)
         ns = root_namespace[ids[0]]
