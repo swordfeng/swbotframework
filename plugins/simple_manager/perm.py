@@ -1,5 +1,6 @@
 from core import *
 from core import _
+import db
 from .general_handler import *
 import logging
 
