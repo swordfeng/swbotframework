@@ -191,7 +191,7 @@ Part of Simple Manager (simple_manager)'''
                     where_pos = cmds.index('where')
                 crole = ' '.join(cmds[1:to_pos]).strip()
                 centity = ' '.join(cmds[to_pos+1:where_pos]).strip()
-                ccons = ' '.join(cmds[where_pos+1:]).strip()
+                ccons = ' '.join(cmds[where_pos+1:]).strip() if where_pos < len(cmds) else []
                 role_name, params = parse_role(crole)
                 entity = centity
                 constraints = {}
