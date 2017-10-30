@@ -97,6 +97,7 @@ class Role:
                     if not passed:
                         break
                 if passed:
+                    logger.info(f'check passed {rule}')
                     return True
             return False
         finally:
