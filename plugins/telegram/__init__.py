@@ -48,7 +48,7 @@ class TelegramBot:
             chat = self.bot.getChat(chat_id=ids[1])
             return TelegramChannel(chat, self)
         elif ids[0] == 'message':
-            return Message.query_alias(join_ident(['telegram', self.bot_id, 'message', ids[1]]))
+            return _(Message.query_alias(join_ident(['telegram', self.bot_id, 'message', ids[1]])))
     def kill(self):
         self.running = False
         self.task.cancel()
