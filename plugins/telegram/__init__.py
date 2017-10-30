@@ -153,10 +153,12 @@ class TelegramUser(User):
                     'username': u.username
                     })
             else:
-                changed = user['first_name'] != u.first_name or user['last_name'] != u.last_name or user['username'] != u.username
-                user['first_name'] = u.first_name
-                user['last_name'] = u.last_name
-                user['username'] = u.username
+                changed = user.data['first_name'] != u.first_name or \
+                          user.data['last_name'] != u.last_name or \
+                          user.data['username'] != u.username
+                user.data['first_name'] = u.first_name
+                user.data['last_name'] = u.last_name
+                user.data['username'] = u.username
                 if changed:
                     user.persist()
 
