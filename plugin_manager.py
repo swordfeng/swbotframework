@@ -24,6 +24,7 @@ def load_plugin(name):
         return
     try:
         mod = import_module(f'.{name}', 'plugins')
+        mod.ident = lambda: f'pm.{name}'
         loaded_plugins[name] = mod
         reload(mod) # refresh module if changed
         mod.initialize()
