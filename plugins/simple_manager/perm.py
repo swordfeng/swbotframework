@@ -212,7 +212,7 @@ Part of Simple Manager (simple_manager)'''
                             name = cons[:pos].strip()
                             roles = cons[pos+1:].split('+')
                             assert(name not in constraints)
-                            constraints[name] = map(str.strip, roles)
+                            constraints[name] = [*map(str.strip, roles)]
                         else:
                             raise Exception(f'Bad constraint {cons}')
                 _(f'permission:{role_name}').assign(entity, params, constraints)
