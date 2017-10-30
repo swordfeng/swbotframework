@@ -41,7 +41,12 @@ def handle(cmd, msg, chan):
         obj = query_object(item)
         if obj is None:
             return 'Object not found'
-        return get_info(obj)
+        try:
+            info = get_info(obj)
+        except:
+            info = f'Error happened when getting info for {item}'
+            logger.exception(info)
+        return info
     return 'Unrecognized command'
 
 def get_info(obj):
@@ -51,13 +56,10 @@ def get_info(obj):
     if klass is type:
         name = f'{obj.__module__}.{obj.__name__}'
         info += f'\nName: {name}'
-    try:
-        if hasattr(obj, 'info'):
-            moreinfo = obj.info()
-            info += '\n'
-            info += moreinfo
-    except:
-        logger.exception(f'Bad info()')
+    if hasattr(obj, 'info'):
+        moreinfo = obj.info()
+        info += '\n'
+        info += moreinfo
     return info
 
 def initialize():
