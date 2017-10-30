@@ -139,9 +139,9 @@ class TelegramUser(User):
         i = super().info()
         if 'username' in self.data and self.data['username'] is not None:
             i += '\nUsername: ' + self.data['username']
-        elif 'first_name' in self.data and self.data['first_name'] is not None:
+        if 'first_name' in self.data and self.data['first_name'] is not None:
             i += '\nFirst Name: ' + self.data['first_name']
-        elif 'last_name' in self.data and self.data['last_name'] is not None:
+        if 'last_name' in self.data and self.data['last_name'] is not None:
             i += '\nLast Name: ' + self.data['last_name']
         return i
     def update(u: telegram.User):
