@@ -144,11 +144,26 @@ class TelegramUser(User):
         elif 'last_name' in self.data and self.data['last_name'] is not None:
             i += '\nLast Name: ' + self.data['last_name']
         return i
+    def update(u: telegram.User):
+            user = query_object(f'telegram:user:{u.id}')
+            if user is None:
+                TelegramUser(u.id, {
+                    'first_name': u.first_name,
+                    'last_name': u.last_name,
+                    'username': u.username
+                    })
+            else:
+                changed = user['first_name'] != u.first_name or user['last_name'] != u.last_name or user['username'] != u.username
+                user['first_name'] = u.first_name
+                user['last_name'] = u.last_name
+                user['username'] = u.username
+                if changed:
+                    user.persist()
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
-        update_user(tm.from_user)
+        TelegramUser.update(tm.from_user)
         # todo: non-text
         if not tm.text:
             return None
@@ -165,11 +180,3 @@ def telegram2message(update: telegram.Update, bot: TelegramBot):
         msg.persist()
         return msg
     return None
-
-def update_user(u: telegram.User):
-    TelegramUser(u.id, {
-        'first_name': u.first_name,
-        'last_name': u.last_name,
-        'username': u.username
-        })
-
