@@ -76,6 +76,7 @@ class Role:
                         break
                 if passed:
                     return True
+            return False
         finally:
             checkingset.remove(desc)
 
