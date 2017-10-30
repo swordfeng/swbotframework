@@ -109,9 +109,7 @@ class Role:
     def assign(self, entity, params=[], constraints={}):
         assert(len(params) == self.num_params)
         def assert_entity(entity: str):
-            if entity.startswith('*'):
-                assert(entity[1:] in constraints)
-            else:
+            if not entity.startswith('*'):
                 assert_ident(entity)
         assert_entity(entity)
         for param in params:
