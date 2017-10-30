@@ -8,7 +8,7 @@ logger = logging.getLogger('simple_manager')
 class SimpleManager(GeneralHandler):
     def __init__(self):
         super().__init__()
-        self.register(info)
+        self.register(info, helpmsg='Show some information on an object')
     name = 'simple_manager'
     prompt = 'sm:'
     description = '''Simple Manager
