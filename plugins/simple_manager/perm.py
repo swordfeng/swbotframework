@@ -162,6 +162,7 @@ Part of Simple Manager (simple_manager)'''
         self.register(delrole, helpmsg='delrole Role')
         self.register(assign, helpmsg='assign Role<> to Entity [where Constraints]')
         self.register(revoke, helpmsg='revoke Role #')
+        self.register(test, helpmsg='test Role<> to Entity')
         self.register(info, helpmsg='info Role')
     def exec(self, cmd: str):
         logger.info(f'execute: {cmd}')
@@ -216,6 +217,13 @@ Part of Simple Manager (simple_manager)'''
             elif cmds[0] == 'revoke':
                 role = _(f'permission:{cmds[1]}').revoke(int(cmds[2]))
                 return True
+            elif cmds[0] == 'test':
+                to_pos = cmds.index('to')
+                crole = ' '.join(cmds[1:to_pos]).strip()
+                centity = ' '.join(cmds[to_pos+1:where_pos]).strip()
+                role_name, params = parse_role(crole)
+                entity = centity
+                return _(f'permission:{role_name}').check(entity, params)
             else:
                 raise Exception('Bad command')
         except:
@@ -244,6 +252,10 @@ def revoke(cmds, msg, chan):
     if not _('permission:SuperUser').check(msg['user']):
         return 'Permission denied'
     cmd = 'revoke ' + ' '.join(cmds)
+    return str(PermissionNS.instance().exec(cmd))
+
+def test(cmds, msg, chan):
+    cmd = 'test ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def info(cmds, msg, chan):
