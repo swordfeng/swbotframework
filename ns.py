@@ -80,6 +80,7 @@ def cacheable(klass):
             return
         original_del(self, *args, **kw)
     klass.__del__ = new_del
+    klass.uncache = uncache_object
     return klass
 
 def query_object(ident, suppress_error=True):

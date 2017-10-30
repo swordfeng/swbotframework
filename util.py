@@ -23,11 +23,9 @@ def join_ident(ids: list):
 
 def head_ident(ident: str):
     assert_ident(ident)
-    sep = len(ident)
-    try:
-        sep = ident.index(':')
-    except ValueError:
-        pass
+    sep = ident.find(':')
+    if sep == -1:
+        sep = len(ident)
     return ident[:sep]
 
 def yamldump(obj):
