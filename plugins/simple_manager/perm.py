@@ -191,25 +191,26 @@ Part of Simple Manager (simple_manager)'''
                     where_pos = cmds.index('where')
                 crole = ' '.join(cmds[1:to_pos]).strip()
                 centity = ' '.join(cmds[to_pos+1:where_pos]).strip()
-                ccons = ' '.join(cmds[where_pos+1:]).strip() if where_pos < len(cmds) else []
+                ccons = ' '.join(cmds[where_pos+1:]).strip()
                 role_name, params = parse_role(crole)
                 entity = centity
                 constraints = {}
-                for cons in ccons.split(','):
-                    if '=' in cons:
-                        pos = cons.index('=')
-                        name = cons[:pos].strip()
-                        ident = cons[pos+1:].strip()
-                        assert(name not in constraints)
-                        constraints[name] = ident
-                    elif '~' in cons:
-                        pos = cons.index('~')
-                        name = cons[:pos].strip()
-                        roles = cons[pos+1:].split('+')
-                        assert(name not in constraints)
-                        constraints[name] = map(str.strip, roles)
-                    else:
-                        raise Exception(f'Bad constraint {cons}')
+                if len(ccons) > 0:
+                    for cons in ccons.split(','):
+                        if '=' in cons:
+                            pos = cons.index('=')
+                            name = cons[:pos].strip()
+                            ident = cons[pos+1:].strip()
+                            assert(name not in constraints)
+                            constraints[name] = ident
+                        elif '~' in cons:
+                            pos = cons.index('~')
+                            name = cons[:pos].strip()
+                            roles = cons[pos+1:].split('+')
+                            assert(name not in constraints)
+                            constraints[name] = map(str.strip, roles)
+                        else:
+                            raise Exception(f'Bad constraint {cons}')
                 _(f'permission:{role_name}').assign(entity, params, constraints)
                 return True
             elif cmds[0] == 'revoke':
