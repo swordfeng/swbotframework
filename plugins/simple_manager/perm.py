@@ -86,7 +86,7 @@ class Role:
                         return ident == con
                     for role_info in con:
                         role_name, params = parse_role(role_info)
-                        for idx in range(len(params)):
+                        for i in range(len(params)):
                             if params[i].startswith('*'):
                                 params[i] = resolved[params[i][1:]]
                         role = query_object(f'permission:{role_name}')
