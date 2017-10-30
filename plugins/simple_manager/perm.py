@@ -40,6 +40,8 @@ class Role:
             assert_ident(arg)
         assert(len(args) == self.num_params)
 
+        logger.info(f'check {self.name} {args} {ident}')
+
         desc = f'{ident}~{self.name}<{",".join(args)}>'
         if desc in checkingset:
             return False
@@ -50,6 +52,7 @@ class Role:
                 params = rule['params']
                 constraints = rule['constraints']
                 def check_on(ident: str, entity: str):
+                    logger.info(f'check_on {ident} {entity}')
                     if ident == entity:
                         return True
                     if entity.startswith('*'):
