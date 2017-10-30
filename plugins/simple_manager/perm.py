@@ -61,7 +61,7 @@ class Role:
                             return ident == con
                         for role_info in con:
                             role_name, params = parse_role(role_info)
-                            role = query_object(f'perm:{role_name}')
+                            role = query_object(f'permission:{role_name}')
                             if role is None or not role.check(ident, params):
                                 return False
                         return True
