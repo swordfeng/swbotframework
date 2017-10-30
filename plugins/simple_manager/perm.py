@@ -5,13 +5,6 @@ import logging
 
 logger = logging.getLogger('permission')
 
-def initialize():
-    if query_object(f'permission:SuperUser') is None:
-        PermissionNS.exec('addrole SuperUser')
-        PermissionNS.exec('assign SuperUser to telegram:user:109890321')        
-def finalize():
-    pass
-
 checkingset = set()
 
 @cacheable
@@ -153,6 +146,8 @@ class PermissionNS(GeneralHandler):
     prompt = 'perm:'
     description = '''Permission Management
 Part of Simple Manager (simple_manager)'''
+    def instance():
+        return _(PermissionNS.name)
     def query(self, ids):
         if len(ids) != 1:
             return None
@@ -167,7 +162,7 @@ Part of Simple Manager (simple_manager)'''
         self.register(assign, helpmsg='assign Role<> to Entity [where Constraints]')
         self.register(revoke, helpmsg='revoke Role #')
         self.register(info, helpmsg='info Role')
-    def exec(cmd: str):
+    def exec(self, cmd: str):
         logger.info(f'execute: {cmd}')
         try:
             cmds = cmd.split(' ')
@@ -229,25 +224,25 @@ def addrole(cmds, msg, chan):
     if not _('permission:SuperUser').check(msg['user']):
         return 'Permission denied'
     cmd = 'addrole ' + ' '.join(cmds)
-    return str(PermissionNS.exec(cmd))
+    return str(PermissionNS.instance().exec(cmd))
 
 def delrole(cmds, msg, chan):
     if not _('permission:SuperUser').check(msg['user']):
         return 'Permission denied'
     cmd = 'delrole ' + ' '.join(cmds)
-    return str(PermissionNS.exec(cmd))
+    return str(PermissionNS.instance().exec(cmd))
 
 def assign(cmds, msg, chan):
     if not _('permission:SuperUser').check(msg['user']):
         return 'Permission denied'
     cmd = 'assign ' + ' '.join(cmds)
-    return str(PermissionNS.exec(cmd))
+    return str(PermissionNS.instance().exec(cmd))
 
 def revoke(cmds, msg, chan):
     if not _('permission:SuperUser').check(msg['user']):
         return 'Permission denied'
     cmd = 'revoke ' + ' '.join(cmds)
-    return str(PermissionNS.exec(cmd))
+    return str(PermissionNS.instance().exec(cmd))
 
 def info(cmds, msg, chan):
     return _(f'permission:{cmds[0]}').info()
