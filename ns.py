@@ -14,7 +14,7 @@ def cache_object(obj):
     assert_ident(ident)
     logger.info(f'cache: {ident}')
     if ident in cache and cache[ident]() is not obj:
-        logger.error('different object with same identifier!')
+        logger.error(f'(cache) different object with same identifier {ident}!')
         # todo: raise
     # add to cache
     cache[ident] = weakref.ref(obj)
@@ -44,7 +44,7 @@ def uncache_object(obj, byGC=False):
     assert_ident(ident)
     logger.info(f'uncache{"(GC)" if byGC else ""}: {ident}')
     if ident in cache and cache[ident]() is not obj:
-        logger.error('different object with same identifier!')
+        logger.error(f'(uncache) different object with same identifier {ident}!')
         # todo: raise
     if hasattr(obj, 'on_uncache'):
         obj.on_uncache()
