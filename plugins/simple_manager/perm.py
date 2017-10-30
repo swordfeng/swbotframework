@@ -124,12 +124,16 @@ class Role:
                 result += f'\n{num}: assign {self.name}{sparams} to {rule["entity"]}'
                 if len(rule['constraints']) > 0:
                     result += ' where'
+                    first = True
                     for name in rule['constraints']:
                         cons = rule['constraints'][name]
+                        if not first:
+                            result += ","
                         if type(cons) is str:
                             result += f' {name} = {cons}'
                         else:
                             result += f' {name} ~ {" + ".join(cons)}'
+                        first = False
                 num += 1
             return result
 
