@@ -153,7 +153,7 @@ class PermissionNS(GeneralHandler):
     prompt = 'perm:'
     description = '''Permission Management
 Part of Simple Manager (simple_manager)'''
-    def query(ids):
+    def query(self=None, ids):
         if len(ids) != 1:
             return None
         try:
@@ -167,7 +167,7 @@ Part of Simple Manager (simple_manager)'''
         self.register(assign, helpmsg='assign Role<> to Entity [where Constraints]')
         self.register(revoke, helpmsg='revoke Role #')
         self.register(info, helpmsg='info Role')
-    def exec(cmd: str):
+    def exec(self=None, cmd: str):
         logger.info(f'execute: {cmd}')
         try:
             cmds = cmd.split(' ')
