@@ -72,6 +72,13 @@ class Role:
                         resolved[name] = constraints[name]
                 if not passed:
                     continue
+                for name in constraints:
+                    if name not in resolved:
+                        logger.warning(f'Unresolved name {name} in rule for role {self.name}')
+                        passed = False
+                        break
+                if not passed:
+                    continue
                 def check_on(name: str):
                     ident = resolved[name]
                     con = constraints[name]
@@ -79,15 +86,14 @@ class Role:
                         return ident == con
                     for role_info in con:
                         role_name, params = parse_role(role_info)
+                        for idx in range(len(params)):
+                            if params[i].startswith('*'):
+                                params[i] = resolved[params[i][1:]]
                         role = query_object(f'permission:{role_name}')
                         if role is None or not role.check(ident, params):
                             return False
                     return True
                 for name in constraints:
-                    if name not in resolved:
-                        logger.warning(f'Unresolved name {name} in rule for role {self.name}')
-                        passed = False
-                        break
                     if not check_on(name):
                         passed = False
                         break
