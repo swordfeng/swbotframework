@@ -45,7 +45,7 @@ class GeneralHandler(Channel):
         if cmds[0] not in self.handlers:
             return f'Command {cmds[0]} not found'
         return self.handlers[cmds[0]](cmds[1:], msg, chan)
-    def help(self):
+    def help(self, cmds, msg, chan):
         result = self.description + '\nCommands:'
         for cmd in self.helpmsg:
             result += f'\n- {cmd}: {self.helpmsg[cmd]}'
