@@ -51,7 +51,7 @@ def reload_plugin(name):
     unload_plugin(name)
 
 def list_plugin():
-    return {'loaded': loaded_plugins.keys(), 'enabled': list(enabled_plugins)}
+    return {'loaded': [*loaded_plugins.keys()], 'enabled': [*list(enabled_plugins)]}
 
 def enable_plugin(name: str):
     enabled_plugins.add(name)
