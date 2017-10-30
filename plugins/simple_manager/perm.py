@@ -48,30 +48,47 @@ class Role:
         checkingset.add(desc)
         try:
             for rule in self.config['rules']:
+                passed = True
                 entity = rule['entity']
                 params = rule['params']
                 constraints = rule['constraints']
-                def check_on(ident: str, entity: str):
-                    logger.info(f'check_on {ident} {entity}')
-                    if ident == entity:
-                        return True
-                    if entity.startswith('*'):
-                        con = constraints[entity[1:]]
-                        if type(con) is str:
-                            return ident == con
-                        for role_info in con:
-                            role_name, params = parse_role(role_info)
-                            role = query_object(f'permission:{role_name}')
-                            if role is None or not role.check(ident, params):
-                                return False
-                        return True
-                    return False
-                passed = True
-                if not check_on(ident, entity):
-                    passed = False
-                    continue
+                resolved = {}
+                if entity.startswith('*'):
+                    resolved[entity[1:]] = ident
                 for idx in range(0, len(params)):
-                    if not check_on(args[idx], params[idx]):
+                    if params[idx].startswith('*'):
+                        k = params[idx][1:]
+                        if k in resolved and resolved[k] != args[idx]:
+                            passed = False
+                            break
+                        resolved[params[idx][1:]] = args[idx]
+                if not passed:
+                    continue
+                for name in constraints:
+                    if type(constraints[name]) is str:
+                        if name in resolved and resolved[name] != constraints[name]:
+                            passed = False
+                            break
+                        resolved[name] = constraints[name]
+                if not passed:
+                    continue
+                def check_on(name: str):
+                    ident = resolved[name]
+                    con = constraints[name]
+                    if type(con) is str:
+                        return ident == con
+                    for role_info in con:
+                        role_name, params = parse_role(role_info)
+                        role = query_object(f'permission:{role_name}')
+                        if role is None or not role.check(ident, params):
+                            return False
+                    return True
+                for name in constraints:
+                    if name not in resolved:
+                        logger.warning(f'Unresolved name {name} in rule for role {self.name}')
+                        passed = False
+                        break
+                    if not check_on(name):
                         passed = False
                         break
                 if passed:
