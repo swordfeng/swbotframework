@@ -1,13 +1,13 @@
 from core import *
 from core import _
 import logging
-from general_handler import *
+from .general_handler import *
 
 logger = logging.getLogger('simple_manager')
 
 class SimpleManager(GeneralHandler):
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
         self.register(info)
     name = 'simple_manager'
     prompt = 'sm:'

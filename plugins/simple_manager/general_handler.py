@@ -10,7 +10,7 @@ class GeneralHandler(Channel):
         self.logger = logging.getLogger(self.name)
         self.handlers = {}
         self.helpmsg = {}
-        super().__init__(self)
+        super().__init__()
         self.register(self.help, helpmsg='Show help')
     def ident(self):
         return self.name
