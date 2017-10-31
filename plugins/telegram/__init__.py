@@ -153,7 +153,10 @@ class TelegramUser(User):
                     'username': u.username
                     })
             else:
-                changed = user.data['first_name'] != u.first_name or \
+                changed = 'first_name' not in user.data or \
+                          'last_name' not in user.data or \
+                          'username' not in user.data or \
+                          user.data['first_name'] != u.first_name or \
                           user.data['last_name'] != u.last_name or \
                           user.data['username'] != u.username
                 user.data['first_name'] = u.first_name
