@@ -34,7 +34,7 @@ class Role:
 
     def assertion(self, ident, args=[]):        
         if not self.check(ident, args):
-            raise PermissionError(f'{ident} ~ {self.name}<{", ".join(args)}>')
+            raise PermissionError(f'{ident} ~ {self.name}{"<" + ", ".join(args) + ">" if len(args) > 0 else ""}')
     def check(self, ident, args=[]):
         assert_ident(ident)
         for arg in args:
