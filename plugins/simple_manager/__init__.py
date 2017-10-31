@@ -36,7 +36,7 @@ def info(cmds, msg, chan):
     return get_info(obj)
 
 def plugin(cmds, msg, chan):
-    _('perm:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg['user'])
     if cmds[0] == 'load':
         _('pm').load(cmds[1])
         return 'loaded'
@@ -47,7 +47,7 @@ def plugin(cmds, msg, chan):
         return 'unknown'
 
 def listener(cmds, msg, chan):
-    _('perm:SuperUser').assertion(msg['user']) # todo: ChannelAdmin
+    _('permission:SuperUser').assertion(msg['user']) # todo: ChannelAdmin
     listenee = _(cmds[1])
     if cmds[0] == 'add':
         chan.add_listener(listenee)
