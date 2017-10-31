@@ -10,7 +10,7 @@ class GlobalHook(Channel):
     def send_message(self, msg, chan):
         if chan.ident() == self.ident():
             return
-        for chanId in self.listeners:
+        for chanId in list(self.config['listeners']):
             try:
                 _(chanId).send_message(msg, chan)
             except:
