@@ -26,6 +26,8 @@ class GeneralHandler(Channel):
         else:
             try:
                 result = self.handle(cmds, msg, chan)
+            except PermissionError as e:
+                result = f'Permission denied: {e}'
             except:
                 self.logger.info(f'Unhandled command: {cmd}', exc_info=True)
                 result = 'Error happened when processing the command'   

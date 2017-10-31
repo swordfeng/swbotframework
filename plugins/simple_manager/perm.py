@@ -33,7 +33,8 @@ class Role:
         self.uncache()
 
     def assertion(self, ident, args=[]):        
-        assert(self.check(ident, args))
+        if not self.check(ident, args):
+            raise PermissionError(f'{ident} ~ {self.name}<{", ".join(args)}>')
     def check(self, ident, args=[]):
         assert_ident(ident)
         for arg in args:
@@ -265,26 +266,22 @@ Part of Simple Manager (simple_manager)'''
             return False
 
 def addrole(cmds, msg, chan):
-    if not _('permission:SuperUser').check(msg['user']):
-        return 'Permission denied'
+    _('permission:SuperUser').assertion(msg['user'])
     cmd = 'addrole ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def delrole(cmds, msg, chan):
-    if not _('permission:SuperUser').check(msg['user']):
-        return 'Permission denied'
+    _('permission:SuperUser').assertion(msg['user'])
     cmd = 'delrole ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def assign(cmds, msg, chan):
-    if not _('permission:SuperUser').check(msg['user']):
-        return 'Permission denied'
+    _('permission:SuperUser').assertion(msg['user'])
     cmd = 'assign ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def revoke(cmds, msg, chan):
-    if not _('permission:SuperUser').check(msg['user']):
-        return 'Permission denied'
+    _('permission:SuperUser').assertion(msg['user'])
     cmd = 'revoke ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 

@@ -10,6 +10,8 @@ class SimpleManager(GeneralHandler):
     def __init__(self):
         super().__init__()
         self.register(info, helpmsg='Show some information about an object')
+        self.register(plugin, helpmsg='load|unload <plugin name>')
+        self.register(listener, helpmsg='add|remove <channel>')
     name = 'simple_manager'
     prompt = 'sm:'
     description = '''Simple Manager
@@ -18,14 +20,43 @@ Home: https://github.com/swordfeng/swbotframework/tree/master/plugins/simple_man
 
 def info(cmds, msg, chan):
     item = None
-    if len(cmds) > 0:
-        item = cmds[0]
-    else:
+    if len(cmds) == 0:
         item = msg.ident()
+    elif cmds[0] == '$me':
+        item = msg['user']
+    elif cmds[0] == '$chan':
+        item = chan.ident()
+    elif cmds[0] == '$rep':
+        item = msg['reply_to']
+    else:
+        item = cmds[0]
     obj = query_object(item)
     if obj is None:
         return 'Object not found'
     return get_info(obj)
+
+def plugin(cmds, msg, chan):
+    _('perm:SuperUser').assertion(msg['user'])
+    if cmds[0] == 'load':
+        _('pm').load(cmds[1])
+        return 'loaded'
+    elif cmds[0] == 'unload':
+        _('pm').unload(cmds[1])
+        return 'unloaded'
+    else:
+        return 'unknown'
+
+def listener(cmds, msg, chan):
+    _('perm:SuperUser').assertion(msg['user']) # todo: ChannelAdmin
+    listenee = _(cmds[1])
+    if cmds[0] == 'add':
+        chan.add_listener(listenee)
+        return 'added'
+    elif cmds[0] == 'remove':
+        chan.remove_listener(listenee)
+        return 'removed'
+    else:
+        return 'unknown'
 
 def get_info(obj):
     klass = type(obj)
