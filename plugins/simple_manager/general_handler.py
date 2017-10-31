@@ -36,7 +36,7 @@ class GeneralHandler(Channel):
             'reply_to': msg.ident(),
             'origin': self.ident()
             })
-        chan.send_message(rep, chan)
+        chan.send_message(rep, self)
     def on_register_root(self):
         query_object('global_hook').add_listener(self)
     def on_unregister_root(self):
