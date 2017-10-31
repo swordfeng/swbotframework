@@ -54,7 +54,7 @@ class Channel:
             chan.persist()
     def on_receive(self, msg: 'Message'):
         logger.info(f'{self.ident()} on_receive: {msg}')
-        for chanId in self.listeners:
+        for chanId in list(self.listeners):
             try:
                 chan = query_object(chanId)
                 if chan is not None:
