@@ -24,7 +24,6 @@ class Channel:
     def remove_listener(self, chan: 'Channel'):
         logger.info(f'{self.ident()} remove_listener: {chan.ident()}')
         chanId = chan.ident()
-        self.listeners.discard(chanId)
         if chanId in self.config['listeners']:
             self.config['listeners'].remove(chanId)
             self.persist()
