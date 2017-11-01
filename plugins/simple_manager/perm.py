@@ -232,7 +232,21 @@ Part of Simple Manager (simple_manager)'''
                 entity = centity
                 constraints = {}
                 if len(ccons) > 0:
-                    for cons in ccons.split(','):
+                    cconss = []
+                    brcnt = 0
+                    lastpos = 0
+                    for pos in range(0, len(ccons)):
+                        if ccons[pos] == '<':
+                            brcnt += 1
+                        elif ccons[pos] == '>':
+                            brcnt -= 1
+                            if brcnt < 0:
+                                raise Exception('Error parsing constraints')
+                        elif ccons[pos] == ',' and brcnt == 0:
+                            cconss.append(ccons[lastpos:pos])
+                            lastpos = pos + 1
+                    cconss.append(ccons[lastpos:])
+                    for cons in cconss:
                         if '=' in cons:
                             pos = cons.index('=')
                             name = cons[:pos].strip()
