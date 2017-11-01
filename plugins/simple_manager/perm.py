@@ -145,7 +145,7 @@ class Role:
             fname = self.name
             if self.num_params > 0:
                 fname += f'<{", ".join(self.config["param_names"])}>'
-            result = f'addrole {self.name}'
+            result = f'addrole {fname}'
             num = 0
             for rule in self.config['rules']:
                 sparams = f'<{", ".join(rule["params"])}>' if self.num_params > 0 else ""
