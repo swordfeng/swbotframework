@@ -35,3 +35,8 @@ class LogChannel(Channel):
         })
     def send_message(self, msg, chan):
         return
+
+def initialize():
+    register_root(LogNS())
+def finalize():
+    unregister_root(_('log'))
