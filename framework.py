@@ -36,7 +36,7 @@ class Channel:
             chan.config['listen_to'].remove(self.ident())
             chan.persist()
     def on_receive(self, msg: 'Message'):
-        logger.info(f'{self.ident()} on_receive: {msg}')
+        logger.debug(f'{self.ident()} on_receive: {msg}')
         for chanId in list(self.config['listeners']):
             try:
                 chan = query_object(chanId)
