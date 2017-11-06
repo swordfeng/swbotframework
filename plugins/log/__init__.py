@@ -14,6 +14,7 @@ class LogNS:
 class LogHandler(logging.Handler):
     def __init__(self, cb):
         self.cb = cb
+        super().__init__()
     def emit(self, record):
         self.cb(self.format(record))
 
