@@ -12,6 +12,7 @@ class SimpleManager(GeneralHandler):
         self.register(info, helpmsg='Show some information about an object')
         self.register(plugin, helpmsg='load|unload <plugin name>')
         self.register(listener, helpmsg='add|remove <channel>')
+        self.register(listen_to, helpmsg='add|remove <channel>')
     name = 'simple_manager'
     prompt = 'sm:'
     description = '''Simple Manager
@@ -54,6 +55,18 @@ def listener(cmds, msg, chan):
         return 'added'
     elif cmds[0] == 'remove':
         chan.remove_listener(listenee)
+        return 'removed'
+    else:
+        return 'unknown'
+
+def listen_to(cmds, msg, chan):
+    _('permission:SuperUser').assertion(msg['user'])
+    target = _(cmds[1])
+    if cmds[0] == 'add':
+        target.add_listener(chan)
+        return 'added'
+    elif cmds[0] == 'remove':
+        target.remove_listener(chan)
         return 'removed'
     else:
         return 'unknown'
