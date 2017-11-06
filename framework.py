@@ -15,18 +15,26 @@ class Channel:
             self.config = {}
         if 'listeners' not in self.config:
             self.config['listeners'] = []
+        if 'listen_to' not in self.config:
+            self.config['listen_to'] = []
     def add_listener(self, chan: 'Channel'):
         logger.info(f'{self.ident()} add_listener: {chan.ident()}')
         chanId = chan.ident()
         if chanId not in self.config['listeners']:
             self.config['listeners'].append(chanId)
             self.persist()
+        if self.ident() not in chan.config['listen_to']:
+            chan.config['listen_to'].append(self.ident())
+            chan.persist()
     def remove_listener(self, chan: 'Channel'):
         logger.info(f'{self.ident()} remove_listener: {chan.ident()}')
         chanId = chan.ident()
         if chanId in self.config['listeners']:
             self.config['listeners'].remove(chanId)
             self.persist()
+        if self.ident() in chan.config['listen_to']:
+            chan.config['listen_to'].remove(self.ident())
+            chan.persist()
     def on_receive(self, msg: 'Message'):
         logger.info(f'{self.ident()} on_receive: {msg}')
         for chanId in list(self.config['listeners']):
@@ -48,7 +56,7 @@ class Channel:
     def send_message(self, msg: 'Message', chan: 'Channel'):
         raise NotImplemented()
     def info(self):
-        return f'Listeners: {self.config["listeners"]}'
+        return yamldump(self.config)
 
 @cacheable
 class Message(dict):
