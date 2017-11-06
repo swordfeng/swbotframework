@@ -13,7 +13,7 @@ class LogNS:
 
 class LogHandler(logging.Handler):
     def __init__(self, cb):
-        logging.Handler.__init__(self)
+        super().__init__()
         self.cb = cb
     def emit(self, record):
         self.cb(self.format(record))
