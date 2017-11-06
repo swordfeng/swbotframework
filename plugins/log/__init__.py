@@ -14,6 +14,7 @@ class LogNS:
 class LogHandler(logging.Handler):
     def __init__(self, cb):
         super().__init__()
+        self.setFormatter(logging.Formatter('%(levelname)-8s: %(message)s'))
         self.cb = cb
     def emit(self, record):
         self.cb(self.format(record))
