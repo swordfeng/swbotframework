@@ -12,7 +12,7 @@ lru_cache = list(map(lambda x: None, range(0, 8)))
 def cache_object(obj):
     ident = obj.ident()
     assert_ident(ident)
-    logger.info(f'cache: {ident}')
+    logger.debug(f'cache: {ident}')
     if ident in cache and cache[ident]() is not obj:
         logger.error(f'(cache) different object with same identifier {ident}!')
         # todo: raise
@@ -42,7 +42,7 @@ def lru_add(obj):
 def uncache_object(obj, byGC=False):
     ident = obj.ident()
     assert_ident(ident)
-    logger.info(f'uncache{"(GC)" if byGC else ""}: {ident}')
+    logger.debug(f'uncache{"(GC)" if byGC else ""}: {ident}')
     if ident in cache and cache[ident]() is not obj:
         logger.error(f'(uncache) different object with same identifier {ident}!')
         # todo: raise
@@ -85,7 +85,7 @@ def cacheable(klass):
 
 def query_object(ident, suppress_error=True):
     assert_ident(ident)
-    logger.info(f'query_object: {ident}')
+    logger.debug(f'query_object: {ident}')
     try:
         if ident in cache:
             obj = cache[ident]()
@@ -99,7 +99,7 @@ def query_object(ident, suppress_error=True):
         obj = ns.query(ids[1:])
         return obj
     except:
-        logger.info('query_object', exc_info=True)
+        logger.debug('query_object', exc_info=True)
         if suppress_error:
             return None
         else:

@@ -62,12 +62,12 @@ class TelegramBot:
                     if update.update_id >= self.last_update:
                         self.last_update = update.update_id + 1
                     msg = telegram2message(update, self)
-                    logger.info(f'receive: {msg}')
+                    logger.debug(f'receive: {msg}')
                     if msg is not None:
                         chan = query_object(msg['origin'])
                         chan.on_receive(msg)
             except telegram.error.TimedOut:
-                logger.info('poll timeout')
+                logger.debug('poll timeout')
             except asyncio.CancelledError:
                 break
             except:
@@ -84,7 +84,7 @@ class TelegramChannel(Channel):
     def ident(self):
         return f'{self.bot.ident()}:chan:{self.chat_id}'
     def send_message(self, msg: Message, chan: Channel):
-        logger.info(f'{self.ident()} send: {msg}')
+        logger.debug(f'{self.ident()} send: {msg}')
         if 'content' not in msg:
             # non-chat message
             return
