@@ -35,7 +35,7 @@ class LogChannel(Channel):
             'content': {'text': log},
             'origin': self.ident()
         })
-        self.on_receive(log_msg)
+        event_loop.call_soon_threadsafe(self.on_receive, log_msg)
     def send_message(self, msg, chan):
         return
 
