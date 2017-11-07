@@ -55,11 +55,11 @@ def list_plugin():
 
 def enable_plugin(name: str):
     enabled_plugins.add(name)
-    db.put_json(list(enabled_plugins))
+    db.put_json('pm', list(enabled_plugins))
 
 def disable_plugin(name: str):
     enabled_plugins.discard(name)
-    db.put_json(list(enabled_plugins))
+    db.put_json('pm', list(enabled_plugins))
 
 class PluginManager:
     def ident():
