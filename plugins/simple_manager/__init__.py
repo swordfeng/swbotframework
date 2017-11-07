@@ -44,6 +44,12 @@ def plugin(cmds, msg, chan):
     elif cmds[0] == 'unload':
         _('pm').unload(cmds[1])
         return 'unloaded'
+    elif cmds[0] == 'enable':
+        _('pm').enable(cmds[1])
+        return 'enabled'
+    elif cmds[0] == 'disable':
+        _('pm').disable(cmds[1])
+        return 'disabled'
     else:
         return 'unknown'
 
