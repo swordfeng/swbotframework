@@ -30,7 +30,8 @@ def load_plugin(name):
         reload(mod) # refresh module if changed
         mod.initialize()
     except:
-        del(loaded_plugins[name])
+        if name in loaded_plugins:
+            del(loaded_plugins[name])
         # todo: handle exception
         raise
 
@@ -43,7 +44,8 @@ def unload_plugin(name):
         mod.finalize()
         del(loaded_plugins[name])
     except:
-        del(loaded_plugins[name])
+        if name in loaded_plugins:
+            del(loaded_plugins[name])
         # todo: handle exception
         raise
 
