@@ -36,7 +36,7 @@ class TelegramNS:
 class TelegramBot:
     def __init__(self, token):
         self.token = token
-        self.bot = telegram.Bot(token)
+        self.bot = telegram.Bot(token, request=telegram.utils.request.Request(con_pool_size=8))
         self.bot_id = self.token.split(':')[0]
         self.last_update = 0
         self.running = True
