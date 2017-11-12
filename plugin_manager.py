@@ -6,6 +6,7 @@ from util import *
 from ns import *
 import db
 import plugins
+from par import event_loop
 
 #sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
@@ -86,6 +87,4 @@ class PluginManager:
         return yamldump(PluginManager.list())
 register_root(PluginManager)
 
-for plugin_name in enabled_plugins:
-    load_plugin(plugin_name)
-
+event_loop.call_soon(list, map(load_plugin, enabled_plugins))
