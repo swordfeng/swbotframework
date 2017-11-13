@@ -29,4 +29,4 @@ def head_ident(ident: str):
     return ident[:sep]
 
 def yamldump(obj):
-    return yaml.dump(obj, default_flow_style=False)
+    return yaml.dump(obj, default_flow_style=False, allow_unicode=True)

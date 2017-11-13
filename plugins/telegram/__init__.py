@@ -139,39 +139,22 @@ class TelegramUser(User):
             name = self.data['last_name']
         return name
     def info(self):
-        i = super().info()
-        if 'username' in self.data and self.data['username'] is not None:
-            i += '\nUsername: ' + self.data['username']
-        if 'first_name' in self.data and self.data['first_name'] is not None:
-            i += '\nFirst Name: ' + self.data['first_name']
-        if 'last_name' in self.data and self.data['last_name'] is not None:
-            i += '\nLast Name: ' + self.data['last_name']
-        return i
+        return super().info() + '\n' + yamldump(self.data)
     def update(u: telegram.User):
-            user = query_object(f'telegram:user:{u.id}')
-            if user is None:
-                TelegramUser(u.id, {
-                    'first_name': u.first_name,
-                    'last_name': u.last_name,
-                    'username': u.username
-                    })
-            else:
-                changed = 'first_name' not in user.data or \
-                          'last_name' not in user.data or \
-                          'username' not in user.data or \
-                          user.data['first_name'] != u.first_name or \
-                          user.data['last_name'] != u.last_name or \
-                          user.data['username'] != u.username
-                user.data['first_name'] = u.first_name
-                user.data['last_name'] = u.last_name
-                user.data['username'] = u.username
-                if changed:
-                    user.persist()
+        user = query_object(f'telegram:user:{u.id}')
+        d = u.to_dict()
+        if user is None:
+            user = TelegramUser(u.id, d)
+        else:
+            if d != user.data:
+                user.data = d
+                user.persist()
+        return user
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
-        TelegramUser.update(tm.from_user)
+        user = TelegramUser.update(tm.from_user)
         # todo: non-text
         if not tm.text:
             return None
@@ -180,7 +163,7 @@ def telegram2message(update: telegram.Update, bot: TelegramBot):
                 'text': tm.text
                 },
             'origin': f'{bot.ident()}:chan:{tm.chat.id}',
-            'user': f'telegram:user:{tm.from_user.id}'
+            'user': user.ident()
             })
         if tm.reply_to_message:
             msg['reply_to'] = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
