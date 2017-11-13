@@ -96,14 +96,17 @@ class TelegramChannel(Channel):
             if len(msg['content']['text']) == 0:
                 return
             kw = {'chat_id': self.chat_id, 'text': msg['content']['text']}
+            if 'user' in msg:
+                kw['text'] = f'[{msg["user"]}] {kw["text"]}'
             if 'reply_to' in msg:
                 rep_msg = query_object(msg['reply_to'])
                 ident = rep_msg.get_alias(f'telegram:{self.bot.bot_id}:message')
                 if ident is not None:
                     kw['reply_to_message_id'] = int(split_ident(ident)[3])
-            self.bot.bot.sendMessage(**kw)
-        else:
-            logger.warning(f'ignored message: {msg}')
+            asyncio.ensure_future(self._send_message(msg, kw), loop=event_loop)
+    async def _send_message(self, msg: Message, kw):
+        _tm = await async_execute(self.bot.bot.sendMessage, **kw)
+        msg.add_alias(f'telegram:{self.bot.bot_id}:message:{_tm.message_id}')
     def info(self):
         return super().info() + f'\nBot: {self.bot.ident()}'
 
@@ -182,6 +185,5 @@ def telegram2message(update: telegram.Update, bot: TelegramBot):
         if tm.reply_to_message:
             msg['reply_to'] = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
         msg.add_alias(f'telegram:{bot.bot_id}:message:{tm.message_id}')
-        msg.persist()
         return msg
     return None
