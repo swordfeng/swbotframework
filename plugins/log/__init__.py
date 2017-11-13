@@ -17,7 +17,7 @@ class LogHandler(logging.Handler):
         self.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         self.cb = cb
     def emit(self, record):
-        self.cb(self.format(record))
+        event_loop.call_soon_threadsafe(self.cb, self.format(record))
 
 class LogChannel(Channel):
     def __init__(self, level):
@@ -35,7 +35,7 @@ class LogChannel(Channel):
             'content': {'text': log},
             'origin': self.ident()
         })
-        event_loop.call_soon_threadsafe(self.on_receive, log_msg)
+        self.on_receive(log_msg)
     def send_message(self, msg, chan):
         return
 
