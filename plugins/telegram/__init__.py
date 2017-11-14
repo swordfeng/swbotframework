@@ -39,6 +39,8 @@ class TelegramBot:
         self.bot = telegram.Bot(token, request=telegram.utils.request.Request(con_pool_size=8))
         self.bot_id = self.token.split(':')[0]
         self._config = db.get_json(self.ident())
+        if self._config is None:
+            self._config = {}
         self.running = True
         self.task = asyncio.ensure_future(self.worker(), loop=event_loop)
     @property
