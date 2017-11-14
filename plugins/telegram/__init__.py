@@ -29,7 +29,7 @@ class TelegramNS:
         bot = TelegramBot(token)
         TelegramNS.bots[bot.bot_id] = bot
     def on_unregister_root():
-        for bot_id in bots:
+        for bot_id in TelegramNS.bots:
             bots[bot_id].kill()
 
 @cacheable
@@ -154,6 +154,7 @@ class TelegramUser(User):
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
+        print(tm.to_json())
         user = TelegramUser.update(tm.from_user)
         # todo: non-text
         if not tm.text:
