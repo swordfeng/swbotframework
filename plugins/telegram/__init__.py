@@ -38,9 +38,20 @@ class TelegramBot:
         self.token = token
         self.bot = telegram.Bot(token, request=telegram.utils.request.Request(con_pool_size=8))
         self.bot_id = self.token.split(':')[0]
-        self.last_update = 0
+        self._config = db.get_json(self.ident())
         self.running = True
         self.task = asyncio.ensure_future(self.worker(), loop=event_loop)
+    @property
+    def last_update(self):
+        if 'last_update' in self._config:
+            return self._config['last_update']
+        return 0
+    @last_update.setter
+    def last_update(self, value):
+        self._config['last_update'] = value
+        self.persist()
+    def persist(self):
+        db.put_json(self.ident(), self._config)
     def ident(self):
         return 'telegram:' + self.bot_id
     def query(self, ids):
