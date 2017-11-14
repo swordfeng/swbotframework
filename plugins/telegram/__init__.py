@@ -30,7 +30,7 @@ class TelegramNS:
         TelegramNS.bots[bot.bot_id] = bot
     def on_unregister_root():
         for bot_id in TelegramNS.bots:
-            bots[bot_id].kill()
+            TelegramNS.bots[bot_id].kill()
 
 @cacheable
 class TelegramBot:
