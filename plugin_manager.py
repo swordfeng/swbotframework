@@ -50,8 +50,8 @@ def unload_plugin(name):
         raise
 
 def reload_plugin(name):
-    load_plugin(name)
     unload_plugin(name)
+    load_plugin(name)
 
 def list_plugin():
     return {'loaded': [*loaded_plugins.keys()], 'enabled': [*list(enabled_plugins)]}
