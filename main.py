@@ -5,7 +5,7 @@ from core import _
 import secret
 
 stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.INFO)
+stdout_handler.setLevel(logging.WARN)
 logging.basicConfig(level=logging.DEBUG, handlers=[stdout_handler])
 
 logger = logging.getLogger('main')
