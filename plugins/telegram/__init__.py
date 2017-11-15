@@ -174,7 +174,7 @@ def telegram2message(update: telegram.Update, bot: TelegramBot):
         reply_to = None
         if tm.reply_to_message:
             reply_to = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
-        msg = Message.new(f'{bot.ident()}:chan:{tm.chat.id}', message_type=TelegramMessageType, user=user.ident(), content=tm, reply_to=reply_to)
+        msg = Message.new(f'{bot.ident()}:chan:{tm.chat.id}', message_type=TelegramMessageType, user=user.ident(), content=tm.to_dict(), reply_to=reply_to)
         msg.add_alias(f'telegram:{bot.bot_id}:message:{tm.message_id}')
         return msg
     return None
