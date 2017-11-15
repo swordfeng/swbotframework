@@ -14,21 +14,11 @@ def initialize():
 def finalize():
     unregister_root(TelegramNS)
 
-class TelegramMessageType(BaseMessageType):
-    def ident():
-        return 'telegram:message_type'
-    def text(self):
-        if 'text' in self.content:
-            return self.content['text']
-        return None
-
 class TelegramNS:
     bots = {}
     def ident():
         return 'telegram'
     def query(ids):
-        if len(ids) < 2:
-            return None
         if ids[0] == 'user':
             return TelegramUser.query(ids[1:])
         if ids[0] == 'message_type':
@@ -168,6 +158,14 @@ class TelegramUser(User):
                 user.data = d
                 user.persist()
         return user
+
+class TelegramMessageType(BaseMessageType):
+    def ident():
+        return 'telegram:message_type'
+    def text(self):
+        if 'text' in self.content:
+            return self.content['text']
+        return None
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
