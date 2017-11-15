@@ -23,6 +23,8 @@ class TelegramNS:
             return None
         if ids[0] == 'user':
             return TelegramUser.query(ids[1:])
+        if ids[0] == 'message_type':
+            return TelegramMessageType
         bot = _(f'telegram:{ids[0]}')
         return bot.query(ids[1:])
     def newbot(token):
@@ -159,17 +161,22 @@ class TelegramUser(User):
                 user.persist()
         return user
 
+class TelegramMessageType(BaseMessageType):
+    def ident():
+        return 'telegram:message_type'
+    def text(self):
+        if 'text' in self.content:
+            return self.content['text']
+        return None
+
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
         user = TelegramUser.update(tm.from_user)
-        # todo: non-text
-        if not tm.text:
-            return None
         reply_to = None
         if tm.reply_to_message:
             reply_to = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
-        msg = Message.new(f'{bot.ident()}:chan:{tm.chat.id}', user=user.ident(), text=tm.text, reply_to=reply_to)
+        msg = Message.new(f'{bot.ident()}:chan:{tm.chat.id}', message_type=TelegramMessageType, user=user.ident(), content=tm, reply_to=reply_to)
         msg.add_alias(f'telegram:{bot.bot_id}:message:{tm.message_id}')
         return msg
     return None
