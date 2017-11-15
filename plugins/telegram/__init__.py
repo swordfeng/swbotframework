@@ -85,8 +85,6 @@ class TelegramBot:
                 break
             except:
                 logger.exception('worker exception')
-    def info(self):
-        return f'Type: telegram bot\nID: {self.ident()}'
 
 class TelegramChannel(Channel):
     def __init__(self, chat: telegram.Chat, bot: TelegramBot):
@@ -115,8 +113,6 @@ class TelegramChannel(Channel):
     async def _send_message(self, msg: Message, kw):
         _tm = await async_execute(self.bot.bot.sendMessage, **kw)
         msg.add_alias(f'telegram:{self.bot.bot_id}:message:{_tm.message_id}')
-    def info(self):
-        return super().info() + f'\nBot: {self.bot.ident()}'
 
 class TelegramUser(User):
     def query(ids):
