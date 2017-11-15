@@ -8,10 +8,10 @@ class Repeater(Channel):
     def ident(self):
         return 'repeater'
     def send_message(self, msg, chan):
-        if 'content' not in msg or 'text' not in msg['content'] or msg['origin'] != chan.ident():
+        if msg.text is None or msg.origin != chan.ident():
             return
         ident = chan.ident()
-        text = msg['content']['text']
+        text = msg.text
         if ident not in self.last_msgs:
             self.last_msgs[ident] = {'last': '', 'count': 0}
         item = self.last_msgs[ident]
@@ -21,12 +21,7 @@ class Repeater(Channel):
         else:
             item['count'] += 1
         if item['count'] == 3:
-            resp = Message({
-                'content': {
-                    'text': text
-                    },
-                'origin': self.ident()
-                })
+            resp = Message.new(self.ident(), text=text)
             chan.send_message(resp, self)
 
 def initialize():

@@ -4,17 +4,9 @@ class Echo(Channel):
     def ident(self):
         return 'echo'
     def send_message(self, msg, chan):
-        if 'content' not in msg:
+        if msg.text is None:
             return
-        if msg['origin'] == self.ident():
-            return
-        if msg['origin'] != chan.ident():
-            return
-        rep = Message({
-            'content': msg['content'],
-            'origin': self.ident(),
-            'reply_to': msg.ident()
-            })
+        rep = Message.new(self.ident(), reply_to=msg.ident(), text=msg.text)
         chan.send_message(rep, self)
 
 def initialize():

@@ -15,9 +15,9 @@ class GeneralHandler(Channel):
     def ident(self):
         return self.name
     def send_message(self, msg, chan):
-        if 'content' not in msg or 'text' not in msg['content'] or msg['origin'] != chan.ident():
+        if msg.text is None or msg.origin != chan.ident():
             return
-        cmd = msg['content']['text']
+        cmd = msg.text
         if not cmd.startswith(self.prompt):
             return
         cmds = cmd[len(self.prompt):].strip().split(' ')
@@ -32,14 +32,8 @@ class GeneralHandler(Channel):
             except:
                 self.logger.warning(f'Unhandled command: {cmd}', exc_info=True)
                 result = 'Error happened when processing the command'   
-        rep = Message({
-            'content': {
-                'text': result
-                },
-            'reply_to': msg.ident(),
-            'origin': self.ident()
-            })
-        chan.send_message(rep, self)
+        resp = Message.new(self.ident(), reply_to=msg.ident(), text=result)
+        chan.send_message(resp, self)
     def on_register_root(self):
         query_object('global_hook').add_listener(self)
     def on_unregister_root(self):

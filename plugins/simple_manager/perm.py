@@ -280,22 +280,22 @@ Part of Simple Manager (simple_manager)'''
             return False
 
 def addrole(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg.user)
     cmd = 'addrole ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def delrole(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg.user)
     cmd = 'delrole ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def assign(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg.user)
     cmd = 'assign ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
 def revoke(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg.user)
     cmd = 'revoke ' + ' '.join(cmds)
     return str(PermissionNS.instance().exec(cmd))
 
@@ -305,4 +305,3 @@ def test(cmds, msg, chan):
 
 def info(cmds, msg, chan):
     return _(f'permission:{cmds[0]}').info()
-

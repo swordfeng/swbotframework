@@ -1,4 +1,4 @@
-from framework import Channel, Message, User
+from framework import Channel, Message, User, BaseMessageType
 from ns import _, query_object, register_root, unregister_root, cacheable
 from util import *
 from par import *

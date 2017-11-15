@@ -1,6 +1,7 @@
 import logging
 from util import *
 from ns import *
+from ns import _
 import plugin_manager
 from uuid import uuid1
 import db
@@ -58,19 +59,47 @@ class Channel:
     def info(self):
         return yamldump(self.config)
 
+class BaseMessageType:
+    def ident():
+        raise NotImplementedError
+    def origin(self):
+        return self['origin']
+    def reply_to(self):
+        if 'reply_to' in self and type(self['reply_to']) is str:
+            return self['reply_to']
+        return None
+    def user(self):
+        if 'user' in self and type(self['user']) is str:
+            return self['user']
+        return None
+    def content(self):
+        return self['content']
+    def is_control(self): # override
+        return False
+    def text(self): # override
+        return None
+class GeneralTextMessageType(BaseMessageType):
+    def ident():
+        return 'message_type_general_text'
+    def text(self):
+        if 'text' not in self.content:
+            return None
+        return self.content['text']
+register_root(GeneralTextMessageType)
+
 @cacheable
 class Message(dict):
     '''
     Message is a json object with some helper functions.
     There are some important json properties that decides
     the content of the message.
-    content: content of the message
-        .text: text content
+    type: ident of message type
+    content: content of the message -- based on message type
+        .text: text content  -- this is the default of base message type
     origin: ident of origin channel
     user: ident of user
     reply_to: ident of user the message is replying to
     '''
-    Cacheable = True
     def query(ids):
         uuid = ids[0]
         data = db.get_json(join_ident(['message', uuid]))
@@ -81,12 +110,35 @@ class Message(dict):
             return 'message'
         return join_ident(['message', self.uuid])
 
+    def new(origin, reply_to=None, user=None, message_type=GeneralTextMessageType, **content):
+        assert_ident(origin)
+        if 'content' in content:
+            content = content['content']
+        data = {
+            'type': message_type.ident(),
+            'origin': origin,
+            'content': content
+        }
+        if reply_to is not None:
+            assert_ident(reply_to)
+            data['reply_to'] = reply_to
+        if user is not None:
+            assert_ident(user)
+            data['user'] = user
+        msg = Message(data)
+        msg.persist()
+        return msg
+
     def __init__(self, data={}, uuid=None):
         super().__init__(data)
-        if uuid == None:
+        if uuid is None:
             uuid = str(uuid1())
         self.uuid = uuid
-        self.persist()
+        self.message_type = _(self['type'])
+    def __getattr__(self, name):
+        if hasattr(self.message_type, name):
+            return getattr(self.message_type, name)(self)
+        raise AttributeError
     def on_uncache(self):
         self.persist()
     def persist(self):

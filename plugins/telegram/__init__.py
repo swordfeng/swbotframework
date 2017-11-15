@@ -77,7 +77,7 @@ class TelegramBot:
                     msg = telegram2message(update, self)
                     logger.debug(f'receive: {msg}')
                     if msg is not None:
-                        chan = query_object(msg['origin'])
+                        chan = _(msg.origin)
                         chan.on_receive(msg)
             except telegram.error.TimedOut:
                 logger.debug('poll timeout')
@@ -98,21 +98,16 @@ class TelegramChannel(Channel):
         return f'{self.bot.ident()}:chan:{self.chat_id}'
     def send_message(self, msg: Message, chan: Channel):
         logger.debug(f'{self.ident()} send: {msg}')
-        if 'content' not in msg:
-            # non-chat message
+        if msg.is_control:
             return
-        if 'file' in msg['content']:
-            pass # todo: senddocuemnt
-        elif 'image' in msg['content']:
-            pass # todo: sendphoto
-        elif 'text' in msg['content']:
-            if len(msg['content']['text']) == 0:
+        if msg.text is not None:
+            if len(msg.text) == 0:
                 return
-            kw = {'chat_id': self.chat_id, 'text': msg['content']['text']}
-            if 'user' in msg:
-                kw['text'] = f'[{msg["user"]}] {kw["text"]}'
-            if 'reply_to' in msg:
-                rep_msg = query_object(msg['reply_to'])
+            kw = {'chat_id': self.chat_id, 'text': msg.text}
+            if msg.user:
+                kw['text'] = f'[{_(msg.user).display_name()}] {kw["text"]}'
+            if msg.reply_to:
+                rep_msg = query_object(msg.reply_to)
                 ident = rep_msg.get_alias(f'telegram:{self.bot.bot_id}:message')
                 if ident is not None:
                     kw['reply_to_message_id'] = int(split_ident(ident)[3])
@@ -167,20 +162,14 @@ class TelegramUser(User):
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
         tm = update.message
-        print(tm.to_json())
         user = TelegramUser.update(tm.from_user)
         # todo: non-text
         if not tm.text:
             return None
-        msg = Message({
-            'content': {
-                'text': tm.text
-                },
-            'origin': f'{bot.ident()}:chan:{tm.chat.id}',
-            'user': user.ident()
-            })
+        reply_to = None
         if tm.reply_to_message:
-            msg['reply_to'] = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
+            reply_to = Message.query_alias(f'telegram:{bot.bot_id}:message:{tm.reply_to_message.message_id}')
+        msg = Message.new(f'{bot.ident()}:chan:{tm.chat.id}', user=user.ident(), text=tm.text, reply_to=reply_to)
         msg.add_alias(f'telegram:{bot.bot_id}:message:{tm.message_id}')
         return msg
     return None

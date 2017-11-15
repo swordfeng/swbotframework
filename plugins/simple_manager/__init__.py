@@ -24,11 +24,11 @@ def info(cmds, msg, chan):
     if len(cmds) == 0:
         item = msg.ident()
     elif cmds[0] == '$me':
-        item = msg['user']
+        item = msg.user
     elif cmds[0] == '$chan':
         item = chan.ident()
     elif cmds[0] == '$rep':
-        item = msg['reply_to']
+        item = msg.reply_to
     else:
         item = cmds[0]
     obj = query_object(item)
@@ -37,7 +37,7 @@ def info(cmds, msg, chan):
     return get_info(obj)
 
 def plugin(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg.user)
     if cmds[0] == 'load':
         _('pm').load(cmds[1])
         return 'loaded'
@@ -57,7 +57,7 @@ def plugin(cmds, msg, chan):
         return 'unknown'
 
 def listener(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user']) # todo: ChannelAdmin
+    _('permission:SuperUser').assertion(msg.user) # todo: ChannelAdmin
     listenee = _(cmds[1])
     if cmds[0] == 'add':
         chan.add_listener(listenee)
@@ -69,7 +69,7 @@ def listener(cmds, msg, chan):
         return 'unknown'
 
 def listen_to(cmds, msg, chan):
-    _('permission:SuperUser').assertion(msg['user'])
+    _('permission:SuperUser').assertion(msg.user)
     target = _(cmds[1])
     if cmds[0] == 'add':
         target.add_listener(chan)

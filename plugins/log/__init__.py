@@ -31,10 +31,7 @@ class LogChannel(Channel):
     def kill(self):
         logging.getLogger().removeHandler(self.handler)
     def on_log(self, log):
-        log_msg = Message({
-            'content': {'text': log},
-            'origin': self.ident()
-        })
+        log_msg = Message.new(text=log, origin=self.ident())
         self.on_receive(log_msg)
     def send_message(self, msg, chan):
         return
