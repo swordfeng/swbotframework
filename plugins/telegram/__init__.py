@@ -14,6 +14,14 @@ def initialize():
 def finalize():
     unregister_root(TelegramNS)
 
+class TelegramMessageType(BaseMessageType):
+    def ident():
+        return 'telegram:message_type'
+    def text(self):
+        if 'text' in self.content:
+            return self.content['text']
+        return None
+
 class TelegramNS:
     bots = {}
     def ident():
@@ -160,14 +168,6 @@ class TelegramUser(User):
                 user.data = d
                 user.persist()
         return user
-
-class TelegramMessageType(BaseMessageType):
-    def ident():
-        return 'telegram:message_type'
-    def text(self):
-        if 'text' in self.content:
-            return self.content['text']
-        return None
 
 def telegram2message(update: telegram.Update, bot: TelegramBot):
     if update.message:
